@@ -11,13 +11,13 @@ const Navbar = () => {
 
   return (
     <div
-      className={cn("fixed top-0 w-full h-20", {
+      className={cn("fixed top-0 w-full h-20 ", {
         hidden: pathname === "/",
       })}
     >
       <nav className="max-width h-full items-center flex justify-between px-5">
         <Logo />
-        <Hamburger />
+        <Hamburger lone />
       </nav>
     </div>
   );

@@ -17,7 +17,7 @@ export default function Hamburger({ lone }: { lone?: boolean }) {
   return (
     <div
       className={cn({
-        "absolute top-0 left-10": lone,
+        "absolute -top-[15px] left-10": lone,
       })}
     >
       <div className={styles.main}>

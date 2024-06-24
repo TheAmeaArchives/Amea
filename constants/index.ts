@@ -29,3 +29,36 @@ export const navItems = [
     href: "/contact",
   },
 ];
+
+export const socialLinks = [
+  {
+    name: "medium",
+    path: "/medium.svg",
+    url: "https://medium.com",
+  },
+  {
+    name: "instagram",
+    path: "/instagram.svg",
+    url: "https://instagram.com",
+  },
+  {
+    name: "x-twitter",
+    path: "/x-twitter.svg",
+    url: "https://x.com",
+  },
+  {
+    name: "threads",
+    path: "/threads.svg",
+    url: "https://threads.com",
+  },
+  {
+    name: "whatsapp",
+    path: "/whatsapp.svg",
+    url: "https://whatsapp.com",
+  },
+  {
+    name: "linkedin",
+    path: "/linkedin.svg",
+    url: "https://linkedin.com",
+  },
+];

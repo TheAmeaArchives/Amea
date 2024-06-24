@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { slide, scale } from "./anime";
+import { cn } from "@/lib/utils";
 
 type Data = {
   data: {
@@ -19,9 +20,6 @@ export default function Index({ data, isActive, setSelectedIndicator }: Data) {
   return (
     <motion.div
       className=""
-      onMouseEnter={() => {
-        setSelectedIndicator(href);
-      }}
       custom={index}
       variants={slide}
       initial="initial"
@@ -33,7 +31,15 @@ export default function Index({ data, isActive, setSelectedIndicator }: Data) {
         animate={isActive ? "open" : "closed"}
         className=""
       ></motion.div>
-      <Link href={href}>{title}</Link>
+      <Link
+        href={href}
+        className={cn({
+          "after:bg-white after:absolute after:h-full after:w-1 after:-left-10 relative after:rounded-r after:top-0 after:bottom-0 my-auto":
+            isActive,
+        })}
+      >
+        {title}
+      </Link>
     </motion.div>
   );
 }

@@ -5,25 +5,7 @@ import { usePathname } from "next/navigation";
 import { menuSlide } from "./anime";
 import Link from "./link";
 import Curve from "./curve";
-
-const navItems = [
-  {
-    title: "Home",
-    href: "/",
-  },
-  {
-    title: "Work",
-    href: "/work",
-  },
-  {
-    title: "About",
-    href: "/about",
-  },
-  {
-    title: "Contact",
-    href: "/contact",
-  },
-];
+import { navItems } from "@/constants";
 
 export default function Nav() {
   const pathname = usePathname();
@@ -55,6 +37,7 @@ export default function Nav() {
             );
           })}
         </div>
+        <div className=""></div>
       </div>
       <Curve />
     </motion.div>

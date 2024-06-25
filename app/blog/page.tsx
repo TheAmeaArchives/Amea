@@ -22,7 +22,7 @@ const Blogs = () => {
                   <p className="text-2xl font-normal font-primary">
                     JUNE 17, 2024
                   </p>
-                  <h1 className="text-4xl font-akira font-bold max-w-xl -z-10">
+                  <h1 className="text-4xl font-bold max-w-xl -z-10">
                     Letter from the editor: You Are Safe Here
                   </h1>
                 </div>
@@ -40,7 +40,7 @@ const Blogs = () => {
         ))}
       </div>
       <div className="flex py-20 flex-col gap-5">
-        <h1 className="text-3xl font-akira font-bold max-w-xl -z-10">
+        <h1 className="text-3xl font-bold max-w-xl -z-10">
           Join over 100,000 Subcriber to Our Newsletter
         </h1>
         <p className=" max-w-2xl font-primary">

@@ -4,15 +4,20 @@ import "./globals.css";
 import Navbar from "@/components/nav/navbar";
 import Footer from "@/components/footer";
 import localFont from "next/font/local";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Amea",
   description: "Write the content not the code",
 };
 
-// const myFont = localFont({
-// src:
-// })
+const myFont = localFont({
+  src: [
+    {
+      path: "../fonts/word.woff",
+    },
+  ],
+});
 
 export default function RootLayout({
   children,
@@ -23,7 +28,12 @@ export default function RootLayout({
     <html lang="en">
       <body className="">
         <Navbar />
-        <main className="max-w-7xl mx-auto w-full min-h-screen">
+        <main
+          className={cn(
+            "max-w-7xl mx-auto w-full min-h-screen",
+            myFont.className
+          )}
+        >
           {children}
         </main>
         <Footer />

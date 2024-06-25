@@ -21,15 +21,15 @@ const ContactForm = () => {
       <form className="flex flex-col gap-3">
         <div className="flex flex-col gap-2">
           <p>Name</p>
-          <input className="border-1 border rounded-sm outline-none p-2" />
+          <input className="border-1 border rounded-sm outline-none p-2 focus:border-default transition-all" />
         </div>
         <div className="flex flex-col gap-2">
           <p>E-mail</p>
-          <input className="border-1 border rounded-sm outline-none p-2" />
+          <input className="border-1 border rounded-sm outline-none p-2 focus:border-default transition-all" />
         </div>
         <div className="flex flex-col gap-2">
           <p>Name</p>
-          <textarea className="border-1 border rounded-sm outline-none p-2 resize-none h-64" />
+          <textarea className="border-1 border rounded-sm outline-none p-2 resize-none h-64 focus:border-default transition-all" />
         </div>
         <div className="flex justify-end">
           <button className="p-[5px] px-6 bg-default text-white rounded-sm ">

@@ -62,3 +62,21 @@ export const socialLinks = [
     url: "https://linkedin.com",
   },
 ];
+
+export const supporters = [
+  {
+    name: "Turning point USA",
+    path: "/turning-point.svg",
+    // url: ""
+  },
+  {
+    name: "International school",
+    path: "/international-school.svg",
+    // url: ""
+  },
+  {
+    name: "Open Dreams",
+    path: "/open-dreams.svg",
+    // url: ""
+  },
+];

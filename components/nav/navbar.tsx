@@ -11,7 +11,7 @@ const Navbar = () => {
 
   return (
     <div
-      className={cn("fixed top-0 w-full h-20 bg-white", {
+      className={cn("fixed top-0 w-full h-20 bg-white z-50", {
         hidden: pathname === "/",
       })}
     >

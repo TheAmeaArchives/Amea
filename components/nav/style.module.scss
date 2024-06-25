@@ -6,6 +6,7 @@
   top: 0;
   color: white;
   font-family: var(--font-aileron);
+  // z-index: 100;
 
   .body {
     box-sizing: border-box;
@@ -56,6 +57,7 @@
     cursor: pointer;
     display: flex;
     align-items: center;
+    z-index: 999;
     justify-content: center;
   }
 
@@ -103,4 +105,5 @@
   height: 100%;
   fill: var(--red-primary);
   stroke: none;
+  z-index: 999;
 }

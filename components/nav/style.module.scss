@@ -65,7 +65,7 @@
     &::before {
       content: "";
       display: block;
-      height: 3px;
+      height: 2px;
       width: 50%;
       margin: auto;
       background-color: var(--red-primary);
@@ -85,7 +85,7 @@
   .burgerActive {
     &::after {
       transform: rotate(50deg);
-      top: -3px;
+      top: -2px;
     }
 
     &::before {

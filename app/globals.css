@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import url("https://fonts.cdnfonts.com/css/aileron");
+@import url("https://fonts.cdnfonts.com/css/akira-expanded");
 
 @layer base {
   :root {
@@ -10,6 +11,7 @@
     --foreground: 222.2 84% 4.9%;
     --red-primary: #e9190f;
     --font-aileron: "Aileron", sans-serif;
+    --font-akira: "Akira Expanded", sans-serif;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;

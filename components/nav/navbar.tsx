@@ -15,7 +15,7 @@ const Navbar = () => {
         hidden: pathname === "/",
       })}
     >
-      <nav className="max-width h-full items-center flex justify-between px-5">
+      <nav className="h-full items-center flex justify-between px-5 ">
         <Logo />
         <Hamburger lone />
       </nav>

@@ -5,7 +5,8 @@ export const navItems = [
   },
   {
     title: "about",
-    href: "/about",
+    href: "#",
+    onIndex: true,
   },
   {
     title: "the archives",

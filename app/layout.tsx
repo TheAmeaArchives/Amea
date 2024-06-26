@@ -30,7 +30,7 @@ export default function RootLayout({
         <Navbar />
         <main
           className={cn(
-            "max-w-7xl mx-auto w-full min-h-screen",
+            "max-w-7xl mx-auto w-full min-h-screen button",
             myFont.className
           )}
         >

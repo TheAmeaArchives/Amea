@@ -4,7 +4,7 @@ import { ArrowRight, EllipsisVertical } from "lucide-react";
 
 const Blogs = () => {
   return (
-    <div className="pt-40 px-5 min-h-screen">
+    <div className="pt-40 px-[100px] min-h-screen">
       <div className="flex flex-col gap-3">
         <h1 className="text-5xl font-extrabold font-akira">OUR BLOG</h1>
         <p className="text-2xl font-primary">A virtual research center</p>
@@ -53,7 +53,7 @@ const Blogs = () => {
       <form className="max-w-xl flex border rounded-full overflow-hidden">
         <input
           type="text"
-          className="flex-1 outline-none border-none px-5 placeholder:font-primary"
+          className="flex-1 outline-none border-none px-[100px] placeholder:font-primary"
           placeholder="Enter your email"
         />
         <button className="p-[5px] bg-default text-white text-xl px-10 outline-none">

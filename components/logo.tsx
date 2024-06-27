@@ -7,8 +7,8 @@ const Logo = ({ width, height }: { width?: number; height?: number }) => {
     <Link href="/">
       <Image
         src="/logo.svg"
-        width={width ? width : 150}
-        height={height ? height : 9}
+        width={width ? width : 127}
+        height={height ? height : 53}
         alt="Amea logo"
       />
     </Link>

@@ -102,18 +102,17 @@
   }
 
   .circle {
-    height: 174px;
-    width: 174px;
+    height: 150px;
+    width: 150px;
     background: #000;
     border-radius: 50%;
   }
 
   .this {
-    height: calc(100vh - 160px);
-    background: red;
+    height: 100vh;
     width: 50%;
     top: 0;
-    right: -96px;
+    right: 0;
     max-width: 600px;
   }
 }

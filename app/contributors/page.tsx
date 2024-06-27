@@ -22,8 +22,12 @@ const Contributors = () => {
         </div>
         <div className="grid grid-cols-3 gap-10">
           {Array.from({ length: 12 }).map((_, index) => (
-            <Link href={`/member/${index + 1}`} className="w-full group">
-              <div key={index} className="relative w-full h-72 bg-black">
+            <Link
+              href={`/member/${index + 1}`}
+              className="w-full group"
+              key={index}
+            >
+              <div className="relative w-full h-72 bg-black">
                 <Image
                   src="/test.svg"
                   alt="Amea project collaborator"

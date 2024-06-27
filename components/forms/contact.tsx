@@ -5,7 +5,7 @@ import React from "react";
 
 const ContactForm = () => {
   return (
-    <div className="font-primary flex flex-col gap-8">
+    <div className=" flex flex-col gap-8">
       <div className="flex flex-col gap-4">
         <h1 className="font-bold text-3xl">Let&apos;s talk</h1>
         <p>

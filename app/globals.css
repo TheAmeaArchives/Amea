@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @import url("https://fonts.cdnfonts.com/css/aileron");
-@import url("https://fonts.cdnfonts.com/css/akira-expanded");
+/* @import url("https://fonts.cdnfonts.com/css/akira-expanded"); */
 
 @layer base {
   :root {
@@ -11,8 +11,6 @@
     --foreground: 222.2 84% 4.9%;
     --red-primary: #e9190f;
     --font-aileron: "Aileron", sans-serif;
-    --font-akira: "Akira Expanded", sans-serif;
-
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
 
@@ -75,8 +73,23 @@
 @layer base {
   * {
     @apply border-border;
-    /* overflow-x: hidden; */
   }
+  html {
+    font-family: var(--aileron-font);
+  }
+
+  .akira {
+    font-family: var(--akira-font);
+  }
+
+  .aileron {
+    font-family: var(--aileron-font);
+  }
+
+  .editor-font {
+    font-family: var(--editor-font);
+  }
+
   body {
     @apply bg-background text-foreground;
   }

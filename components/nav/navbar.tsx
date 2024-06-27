@@ -26,7 +26,7 @@ const Links = ({ isActive }: { isActive: boolean }) => {
   return (
     <div
       className={cn(
-        "flex-1  absolute w-[65%] font-primary h-full left-0 center right-0 top-[-80px] m-auto transition-all duration-300",
+        "flex-1  absolute w-[65%]  h-full left-0 center right-0 top-[-80px] m-auto transition-all duration-300",
         {
           "top-[0px]": isActive,
         }

@@ -11,12 +11,40 @@ export const metadata: Metadata = {
   description: "Write the content not the code",
 };
 
-const myFont = localFont({
+const aileronFont = localFont({
   src: [
     {
-      path: "../fonts/word.woff",
+      path: "../fonts/Aileron-Regular.otf",
+      weight: "500",
+    },
+    {
+      path: "../fonts/Aileron-Light.otf",
+      weight: "300",
     },
   ],
+  variable: "--aileron-font",
+});
+
+const editorFont = localFont({
+  src: [
+    {
+      path: "../fonts/editor-note.ttf",
+      weight: "700",
+    },
+    {
+      path: "../fonts/editor-light.ttf",
+      weight: "300",
+    },
+    {
+      path: "../fonts/editor-thin.ttf",
+      weight: "100",
+    },
+  ],
+  variable: "--editor-font",
+});
+const akiraFont = localFont({
+  src: "../fonts/akira-word.otf",
+  variable: "--akira-font",
 });
 
 export default function RootLayout({
@@ -25,13 +53,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="">
+    <html
+      lang="en"
+      className={cn(
+        aileronFont.variable,
+        editorFont.variable,
+        akiraFont.variable
+      )}
+    >
+      <body>
         <Navbar />
         <main
           className={cn(
-            "max-w-7xl mx-auto w-full min-h-screen button",
-            myFont.className
+            "max-w-7xl mx-auto w-full min-h-screen button thin "
+            // myFont.className
           )}
         >
           {children}

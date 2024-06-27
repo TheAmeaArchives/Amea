@@ -3,11 +3,11 @@ import React from "react";
 
 const Hero = () => {
   return (
-    <div className="w-full h-screen center flex-col gap-8 font-primary">
+    <div className="w-full h-screen center flex-col gap-8 aileron">
       <div className="absolute top-28 left-0  h-96 w-96 2xl:h-[500px] 2xl:w-[500px]">
         <Image src="/path1.svg" alt="Amea hero path one" fill className="" />
       </div>
-      <h1 className="text-5xl text-center font-bold mt-20">
+      <h1 className="text-5xl text-center font-bold font-primary mt-20">
         The Amea <br /> Archives
       </h1>
       <span className="w-1 bg-black h-72 rounded" />

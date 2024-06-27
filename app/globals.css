@@ -100,4 +100,20 @@
   .center {
     @apply flex items-center justify-center;
   }
+
+  .circle {
+    height: 174px;
+    width: 174px;
+    background: #000;
+    border-radius: 50%;
+  }
+
+  .this {
+    height: calc(100vh - 160px);
+    background: red;
+    width: 50%;
+    top: 0;
+    right: -96px;
+    max-width: 600px;
+  }
 }

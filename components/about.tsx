@@ -3,7 +3,7 @@ import React from "react";
 
 const About = () => {
   return (
-    <div className="py-40 px-[100px] min-h-screen flex flex-col gap-80">
+    <div className="min-h-screen flex flex-col gap-80">
       <div>
         <div className="flex items-center gap-10">
           <div className="editor-font">

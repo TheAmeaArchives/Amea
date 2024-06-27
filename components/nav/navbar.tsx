@@ -11,7 +11,7 @@ import Link from "next/link";
 const Navbar = () => {
   const [isActive, setIsActive] = useState(false);
   return (
-    <div className={cn("fixed top-0 w-full h-20 bg-white z-50 px-[100px]")}>
+    <div className={cn("fixed top-0 w-full h-20 bg-white z-[100] px-[100px]")}>
       <nav className="h-full items-center flex justify-between  relative overflow-hidden">
         <Logo />
         <Links isActive={isActive} />

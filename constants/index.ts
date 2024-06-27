@@ -1,13 +1,9 @@
 export const navItems = [
   {
-    title: "home",
+    title: "about",
     href: "/",
   },
-  {
-    title: "about",
-    href: "#",
-    onIndex: true,
-  },
+
   {
     title: "the archives",
     href: "/archieves",
@@ -18,11 +14,15 @@ export const navItems = [
     href: "/gellery",
   },
   {
-    title: "the blog",
+    title: "blog",
     href: "/blog",
   },
   {
-    title: "the team",
+    title: "programs",
+    href: "/programs",
+  },
+  {
+    title: "team",
     href: "/team",
   },
   {

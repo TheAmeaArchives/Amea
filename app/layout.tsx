@@ -28,7 +28,7 @@ const aileronFont = localFont({
 const editorFont = localFont({
   src: [
     {
-      path: "../fonts/editor-note.ttf",
+      path: "../fonts/editor-bold.ttf",
       weight: "700",
     },
     {

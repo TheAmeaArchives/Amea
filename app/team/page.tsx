@@ -5,7 +5,7 @@ import React from "react";
 
 const Teams = () => {
   return (
-    <div className="min-h-screen py-40 px-[100px]">
+    <div className="min-h-screen py-40 px-[100px] font-light">
       <div className="h-screen center">
         <p className="text-center text-[40px]  font-semibold">
           Different shades <br /> of{" "}

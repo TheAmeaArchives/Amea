@@ -11,7 +11,7 @@ export const navItems = [
 
   {
     title: "grand gallery",
-    href: "/gellery",
+    href: "/gallery",
   },
   {
     title: "blog",

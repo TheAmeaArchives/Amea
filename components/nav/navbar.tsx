@@ -37,8 +37,14 @@ const Links = ({ isActive }: { isActive: boolean }) => {
           //some code here
           const isActive = pathname === item.href;
           return (
-            <li className={cn("relative")} key={item.title}>
-              <Link href={item.href} className="capitalize">
+            <li
+              className={cn("relative transition-all duration-300 link", {
+                "after:bg-default after:h-[2px] after:left-0 after:transition-all after:duration-300 after:w-1/2 after:bottom-0 after:absolute after:hover:w-full":
+                  isActive,
+              })}
+              key={item.title}
+            >
+              <Link href={item.href} className={cn("capitalize ")}>
                 {item.title}
               </Link>
             </li>

@@ -11,11 +11,7 @@ const Footer = () => {
   const pathname = usePathname();
 
   return (
-    <footer
-      className={cn("h-20 w-full", {
-        hidden: pathname === "/",
-      })}
-    >
+    <footer className="h-20 w-full">
       <div className="h-20 max-width  xl:p-0 px-4">
         <div className="h-full w-full flex items-center justify-center gap-5">
           {socialLinks.map((link) => (

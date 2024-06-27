@@ -4,7 +4,7 @@ import { ArrowRight, EllipsisVertical } from "lucide-react";
 
 const Blogs = () => {
   return (
-    <div className="pt-40 px-[100px] min-h-screen">
+    <div className="min-h-screen">
       <div className="flex flex-col gap-3">
         <h1 className="text-5xl font-bold akira">OUR BLOG</h1>
         <p className="text-2xl aileron font-light">A virtual research center</p>

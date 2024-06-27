@@ -2,8 +2,12 @@ import React from "react";
 
 const Gallery = () => {
   return (
-    <div className="flex flex-col gap-10">
-      <div className="h-screen center ">
+    <div className="flex flex-col gap-10 ">
+      <div className="akira text-5xl">
+        <h1>Grand</h1>
+        <h1>Galery</h1>
+      </div>
+      <div className="h-[500px] bg-default center">
         <h1 className="text-4xl font-bold">The Grand Galery</h1>
       </div>
       <div className="h-screen center ">

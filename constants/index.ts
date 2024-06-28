@@ -81,3 +81,18 @@ export const supporters = [
     // url: ""
   },
 ];
+
+export const stats = [
+  {
+    count: "06",
+    text: "Experiment hub",
+  },
+  {
+    count: "47",
+    text: "Participants volunteered",
+  },
+  {
+    count: "15",
+    text: "Experiment carried",
+  },
+];

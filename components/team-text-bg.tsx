@@ -2,7 +2,7 @@ import React from "react";
 
 const TeamText = () => {
   return (
-    <div className="team-screen center border-black/50 relative overflow-hidden">
+    <div className="team-screen center h-[603px] border-black/50 relative overflow-hidden">
       <p className="text-center text-[40px]  font-semibold aileron">
         Different shades <br /> of{" "}
         <span className="relative after:absolute after:bg-default after:w-full after:h-1/3 after:left-0 after:bottom-[3px] after:-z-10">

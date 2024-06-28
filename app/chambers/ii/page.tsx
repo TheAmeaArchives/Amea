@@ -1,5 +1,5 @@
 import ChamberHeader from "@/components/chambers/header";
-import { stats } from "@/constants";
+import { constants, stats } from "@/constants";
 import Link from "next/link";
 import React from "react";
 
@@ -30,6 +30,14 @@ const ChamberTwo = () => {
             Volunteer to participate
           </Link>
         </div>
+      </div>
+      <div className="flex flex-col gap-20 mt-20">
+        {constants.map((constant) => (
+          <div key={constant.name} className="flex flex-col gap-6">
+            <h1 className="text-5xl font-bold akira">{constant.name}</h1>
+            <p className="text-xl font-light">{constant.description}</p>
+          </div>
+        ))}
       </div>
     </div>
   );

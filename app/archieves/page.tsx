@@ -29,17 +29,17 @@ const Archives = () => {
           <div className="relative h-full w-full">
             <div className="circle absolute right-0 center">
               <Link href="/chambers/i" className="text-white">
-                Chamber i
+                Chamber I
               </Link>
             </div>
             <div className="circle absolute top-0 bottom-0 bg-black my-auto center">
               <Link href="/chambers/ii" className="text-white">
-                Chamber ii
+                Chamber II
               </Link>
             </div>
             <div className="absolute bottom-20 right-4">
               <Link href={`/chambers/iii`} className="text-white">
-                Chamber iii
+                Chamber III
               </Link>
             </div>
           </div>

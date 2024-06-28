@@ -120,4 +120,8 @@
     height: calc(100vh - 300px);
     margin-bottom: 50px;
   }
+
+  .anim {
+    @apply hover:text-default duration-300 transition-all cursor-pointer text-black/30;
+  }
 }

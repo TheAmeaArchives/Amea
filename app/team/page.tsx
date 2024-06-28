@@ -1,3 +1,4 @@
+import TeamText from "@/components/team-text-bg";
 import { supporters } from "@/constants";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
@@ -7,14 +8,7 @@ import React from "react";
 const Teams = () => {
   return (
     <div className="min-h-screen font-light">
-      <div className="team-screen center border border-black/50 relative overflow-hidden">
-        <p className="text-center text-[40px]  font-semibold aileron">
-          Different shades <br /> of{" "}
-          <span className="relative after:absolute after:bg-default after:w-full after:h-1/3 after:left-0 after:bottom-[3px] after:-z-10">
-            Red
-          </span>
-        </p>
-      </div>
+      <TeamText />
       <div className="flex flex-col gap-16">
         <div className="flex flex-col gap-10">
           <h1 className="text-5xl font-bold akira">OUR TEAM</h1>

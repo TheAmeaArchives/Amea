@@ -1,8 +1,13 @@
 .hamburger {
-  div {
-    height: 3px !important;
-    background: blue;
-    width: 80% !important;
+  .content {
+    width: 70%;
+    height: 70%;
+
+    div {
+      height: 3px !important;
+      border-radius: 2px;
+      width: 80% !important;
+    }
   }
 }
 

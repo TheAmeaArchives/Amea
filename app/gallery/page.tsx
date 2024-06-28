@@ -8,7 +8,7 @@ const Gallery = () => {
         <h1>Galery</h1>
       </div>
       <div className="h-[500px] bg-default center">
-        <h1 className="text-4xl font-bold">The Grand Galery</h1>
+        {/* <h1 className="text-4xl font-bold">The Grand Galery</h1> */}
       </div>
       <div className="h-screen center ">
         <h1 className="text-[32px] font-normal text-center">

@@ -4,7 +4,7 @@ import React from "react";
 const Hero = () => {
   return (
     <div className="w-full h-screen center flex-col gap-8 aileron">
-      <div className="absolute top-28 left-0  h-96 w-96 2xl:h-[500px] 2xl:w-[500px]">
+      <div className="absolute top-28 left-0 h-[250px] w-[250px] xl:h-96 xl:w-96 2xl:h-[500px] 2xl:w-[500px]">
         <Image src="/path1.svg" alt="Amea hero path one" fill className="" />
       </div>
       <h1 className="text-5xl text-center font-bold font-primary mt-20">

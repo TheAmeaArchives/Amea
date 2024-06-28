@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/nav/navbar";
 import Footer from "@/components/footer";
@@ -7,7 +6,7 @@ import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Amea",
+  title: "The Amea Archives",
   description: "Write the content not the code",
 };
 

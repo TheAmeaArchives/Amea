@@ -7,8 +7,8 @@ import React from "react";
 const Teams = () => {
   return (
     <div className="min-h-screen font-light">
-      <div className="h-screen center">
-        <p className="text-center text-[40px]  font-semibold">
+      <div className="team-screen center border border-black/50 relative overflow-hidden">
+        <p className="text-center text-[40px]  font-semibold aileron">
           Different shades <br /> of{" "}
           <span className="relative after:absolute after:bg-default after:w-full after:h-1/3 after:left-0 after:bottom-[3px] after:-z-10">
             Red

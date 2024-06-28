@@ -10,7 +10,7 @@ const ChamberOne = () => {
         title="chamber i"
         description="Insights from curated experiments."
       />
-      <Search />
+      <Search mode="BAR" />
 
       <div className="flex flex-col gap-20 mt-20">
         {Array.from({ length: 10 }).map((_, index) => (

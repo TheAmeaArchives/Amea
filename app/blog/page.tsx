@@ -1,13 +1,19 @@
 import Link from "next/link";
 import React from "react";
 import { ArrowRight, EllipsisVertical } from "lucide-react";
+import Search from "@/components/chambers/search";
 
 const Blogs = () => {
   return (
     <div className="min-h-screen">
-      <div className="flex flex-col gap-3">
-        <h1 className="text-5xl font-bold akira">OUR BLOG</h1>
-        <p className="text-2xl aileron font-light">A virtual research center</p>
+      <div className="flex gap-10">
+        <div className="flex flex-col gap-3 ">
+          <h1 className="text-5xl font-bold akira">OUR BLOG</h1>
+          <p className="text-2xl aileron font-light">
+            A virtual research center
+          </p>
+        </div>
+        <Search mode="ICON" />
       </div>
       <div className="flex flex-col gap-20 mt-20">
         {Array.from({ length: 10 }).map((_, index) => (

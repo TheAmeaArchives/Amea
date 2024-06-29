@@ -7,7 +7,7 @@ import React from "react";
 
 const Teams = () => {
   return (
-    <div className="min-h-screen font-light">
+    <div className="min-h-screen font-light -translate-y-20">
       <TeamText />
       <div className="flex flex-col gap-16">
         <div className="flex flex-col gap-10">

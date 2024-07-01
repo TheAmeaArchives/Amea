@@ -11,7 +11,7 @@ import Link from "next/link";
 const Navbar = () => {
   const [isActive, setIsActive] = useState(false);
   return (
-    <div className={cn("fixed top-0 w-full h-20 bg-white z-50 px-[100px]")}>
+    <div className={cn("fixed top-0 w-full h-20 bg-white z-[100] px-[100px]")}>
       <nav className="h-full items-center flex justify-between  relative overflow-hidden">
         <Logo />
         <Links isActive={isActive} />
@@ -26,7 +26,7 @@ const Links = ({ isActive }: { isActive: boolean }) => {
   return (
     <div
       className={cn(
-        "flex-1  absolute w-[65%] font-primary h-full left-0 center right-0 top-[-80px] m-auto transition-all duration-300",
+        "flex-1  absolute w-[65%]  h-full left-0 center right-0 top-[-80px] m-auto transition-all duration-300",
         {
           "top-[0px]": isActive,
         }
@@ -37,8 +37,14 @@ const Links = ({ isActive }: { isActive: boolean }) => {
           //some code here
           const isActive = pathname === item.href;
           return (
-            <li className={cn("relative")} key={item.title}>
-              <Link href={item.href} className="capitalize">
+            <li
+              className={cn("relative transition-all duration-300 link", {
+                "after:bg-default after:h-[2px] after:left-0 after:transition-all after:duration-300 after:w-1/2 after:bottom-0 after:absolute after:hover:w-full":
+                  isActive,
+              })}
+              key={item.title}
+            >
+              <Link href={item.href} className={cn("capitalize ")}>
                 {item.title}
               </Link>
             </li>

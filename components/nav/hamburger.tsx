@@ -12,13 +12,30 @@ export default function Hamburger({
   return (
     <div
       className={cn(
-        "h-10 w-10  cursor-pointer hamburger  flex flex-col justify-evenly"
+        "h-11 w-11  cursor-pointer hamburger center overflow-hidden transition-all duration-150"
       )}
       onClick={() => setIsActive(!isActive)}
     >
-      <div className="" />
-      <div className="" />
-      <div className="" />
+      <div className="content  flex flex-col justify-evenly center relative">
+        <div
+          className={cn("bg-default transition-all duration-150", {
+            "absolute h-full bg-black -rotate-45 bottom-3": isActive,
+          })}
+        />
+        <div
+          className={cn(
+            "bg-default -translate-x-2 transition-all duration-150",
+            {
+              "-translate-x-[35.2px]": isActive,
+            }
+          )}
+        />
+        <div
+          className={cn("bg-default transition-all duration-150", {
+            "absolute h-full bg-black rotate-45 bottom-3": isActive,
+          })}
+        />
+      </div>
     </div>
   );
 }

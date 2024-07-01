@@ -3,17 +3,21 @@ import React from "react";
 
 const About = () => {
   return (
-    <div className="py-40 px-[100px] min-h-screen flex flex-col gap-80">
+    <div className="min-h-screen flex flex-col gap-80">
       <div>
         <div className="flex items-center gap-10">
-          <div>
-            <h1 className="font-bold text 2xl:text-9xl lg:text-8xl">AI.</h1>
-            <h1 className="font-bold text 2xl:text-9xl lg:text-8xl">
+          <div className="editor-font">
+            <h1 className="font-bold text 2xl:text-9xl lg:text-[120px] leading-[100px]">
+              AI.
+            </h1>
+            <h1 className="font-bold text 2xl:text-9xl lg:text-[120px] leading-[100px]">
               Penicillin.
             </h1>
-            <h1 className="font-bold text 2xl:text-9xl lg:text-8xl">Fire.</h1>
+            <h1 className="font-bold text 2xl:text-9xl lg:text-[120px] leading-[100px]">
+              Fire.
+            </h1>
           </div>
-          <p className="flex flex-col gap-8 text-xl font-primary">
+          <p className="flex flex-col gap-8 text-xl font-light aileron">
             <span>
               All major innovations in history have at least one thing in
               common; they are human-centred. And it isn&apos;t a mere
@@ -41,7 +45,7 @@ const About = () => {
       </div>
       <div>
         <div className="flex items-center gap-10">
-          <p className="flex flex-col gap-8 text-xl font-primary font-light">
+          <p className="flex flex-col gap-8 text-xl  aileron font-light">
             Now this begs the question “How?” Our approach to moving forward
             that mission is threefold. First, we gather all the insights from
             the sciences of human thinking and behavior. These insights, from
@@ -54,19 +58,19 @@ const About = () => {
             some ovf these innovators to push their efforts even further by
             having them consultant us and benefit from our expertise.
           </p>
-          <div>
-            <h1 className="font-bold text 2xl:text-9xl lg:text-8xl relative">
-              Innovation Behavioral Science.
-              <span className="text-default absolute w-full h-full top-0 left-0 center">
+          <div className="editor-font">
+            <h1 className="font-bold text 2xl:text-9xl lg:text-8xl relative flex flex-col gap-5">
+              Innovation <span>Behavioral</span> <span>Science.</span>
+              <span className="text-default absolute w-full h-full -top-16 left-0 center">
                 &
               </span>
             </h1>
           </div>
         </div>
       </div>
-      <div className=" gap-10 center flex-col">
+      <div className=" gap-10 center flex-col editor-font">
         <Image src="/big.svg" alt="Amea big logo" width={250} height={250} />
-        <p className="text-center text-3xl font-light">
+        <p className="text-center text-3xl">
           <span className="relative after:absolute after:bg-default after:w-full after:h-1/3 after:left-0 after:bottom-[3px] after:-z-10">
             It&apos;s all about insights
           </span>

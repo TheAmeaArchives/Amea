@@ -75,7 +75,7 @@ const config = {
       },
       fontFamily: {
         primary: "var(--font-aileron)",
-        akira: "var(--font-akira)",
+        // akira: "var(--akira)",
       },
     },
   },

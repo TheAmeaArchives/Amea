@@ -11,7 +11,7 @@ export const navItems = [
 
   {
     title: "grand gallery",
-    href: "/gellery",
+    href: "/gallery",
   },
   {
     title: "blog",
@@ -79,5 +79,38 @@ export const supporters = [
     name: "Open Dreams",
     path: "/open-dreams.svg",
     // url: ""
+  },
+];
+
+export const stats = [
+  {
+    count: "06",
+    text: "Experiment hub",
+  },
+  {
+    count: "47",
+    text: "Participants volunteered",
+  },
+  {
+    count: "15",
+    text: "Experiment carried",
+  },
+];
+
+export const constants = [
+  {
+    name: "our belief",
+    description:
+      "We are in 2500 BC, Egypt. About 30,000 of the best craftsmen, sculptors and other skilled workers of the time use their combined talents, knowledge and experience to mold and piece together humble blocks of stones to build up what would be-till today-one of the most majestic structures on Earth: The Great Pyramids.",
+  },
+  {
+    name: "our method",
+    description:
+      "We are in 2500 BC, Egypt. About 30,000 of the best craftsmen, sculptors and other skilled workers of the time use their combined talents, knowledge and experience to mold and piece together humble blocks of stones to build up what would be-till today-one of the most majestic structures on Earth: The Great Pyramids.",
+  },
+  {
+    name: "our results",
+    description:
+      "We are in 2500 BC, Egypt. About 30,000 of the best craftsmen, sculptors and other skilled workers of the time use their combined talents, knowledge and experience to mold and piece together humble blocks of stones to build up what would be-till today-one of the most majestic structures on Earth: The Great Pyramids.",
   },
 ];

@@ -12,7 +12,9 @@ export default function Hamburger({
   return (
     <div
       className={cn(
-        "h-11 w-11  cursor-pointer hamburger center overflow-hidden transition-all duration-150"
+        "h-11 w-11  cursor-pointer hamburger center overflow-hidden transition-all duration-150", {
+            "max-sm:z-50": isActive
+          }
       )}
       onClick={() => setIsActive(!isActive)}
     >

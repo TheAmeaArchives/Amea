@@ -78,6 +78,10 @@
     font-family: var(--aileron-font);
   }
 
+  body:has(.requires-no-scroll) {
+    overflow: hidden;
+  }
+
   .akira {
     font-family: var(--akira-font);
   }

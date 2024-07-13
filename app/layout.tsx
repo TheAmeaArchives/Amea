@@ -13,8 +13,12 @@ export const metadata: Metadata = {
 const aileronFont = localFont({
   src: [
     {
-      path: "../fonts/Aileron-Regular.otf",
-      weight: "500",
+      path: "../fonts/Aileron-Bold.otf",
+      weight: "700",
+    },
+    {
+      path: "../fonts/Aileron-SemiBold.otf",
+      weight: "600",
     },
     {
       path: "../fonts/Aileron-Light.otf",

@@ -5,15 +5,15 @@ const About = () => {
   return (
     <div className="min-h-screen flex flex-col gap-80">
       <div>
-        <div className="flex items-center gap-10">
-          <div className="editor-font">
-            <h1 className="font-bold text 2xl:text-9xl lg:text-[120px] leading-[100px]">
+        <div className="flex max-sm:flex-col sm:items-center gap-10">
+          <div className="editor-font font-medium leading-[100px] max-md:w-[278px] max-md:leading-[.8]">
+            <h1 className="text max-md:text-[68px] 2xl:text-9xl lg:text-[120px]">
               AI.
             </h1>
-            <h1 className="font-bold text 2xl:text-9xl lg:text-[120px] leading-[100px]">
+            <h1 className="text max-md:text-[68px] 2xl:text-9xl lg:text-[120px]">
               Penicillin.
             </h1>
-            <h1 className="font-bold text 2xl:text-9xl lg:text-[120px] leading-[100px]">
+            <h1 className="text max-md:text-[68px] 2xl:text-9xl lg:text-[120px]">
               Fire.
             </h1>
           </div>
@@ -44,7 +44,18 @@ const About = () => {
         </div>
       </div>
       <div>
-        <div className="flex items-center gap-10">
+        <div className="flex max-sm:flex-col sm:items-center gap-10">
+          <div className="sm:hidden editor-font">
+            <h1 className="font-medium text max-md:text-[60px] relative flex flex-col leading-[.9]">
+              <span>Innovation</span>
+              <span>Behavioral</span>
+              <span>Science.</span>
+              <p className="text-default absolute text-7xl w-full h-full -top-6 left-0 center">&</p>
+            </h1>
+          </div>
+          {/*<div className="w-full h-[455px] sm:hidden relative">*/}
+          {/*  <Image fill src="/inovationbehaviouralscience.svg" alt="Innovation" />*/}
+          {/*</div>*/}
           <p className="flex flex-col gap-8 text-xl  aileron font-light">
             Now this begs the question “How?” Our approach to moving forward
             that mission is threefold. First, we gather all the insights from
@@ -58,7 +69,7 @@ const About = () => {
             some ovf these innovators to push their efforts even further by
             having them consultant us and benefit from our expertise.
           </p>
-          <div className="editor-font">
+          <div className="max-sm:hidden editor-font">
             <h1 className="font-bold text 2xl:text-9xl lg:text-8xl relative flex flex-col gap-5">
               Innovation <span>Behavioral</span> <span>Science.</span>
               <span className="text-default absolute w-full h-full -top-16 left-0 center">

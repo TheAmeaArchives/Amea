@@ -21,6 +21,10 @@ const aileronFont = localFont({
       weight: "600",
     },
     {
+      path: "../fonts/Aileron-Regular.otf",
+      weight: "400",
+    },
+    {
       path: "../fonts/Aileron-Light.otf",
       weight: "300",
     },
@@ -33,6 +37,10 @@ const editorFont = localFont({
     {
       path: "../fonts/editor-bold.ttf",
       weight: "700",
+    },
+    {
+      path: "../fonts/editor-medium.otf",
+      weight: "500",
     },
     {
       path: "../fonts/editor-light.ttf",
@@ -68,7 +76,7 @@ export default function RootLayout({
         <Navbar />
         <main
           className={cn(
-            "max-w-7xl mx-auto w-full min-h-screen py-40 px-24 "
+            "max-w-7xl mx-auto w-full min-h-screen py-40 px-24 max-sm:px-8"
             // myFont.className
           )}
         >

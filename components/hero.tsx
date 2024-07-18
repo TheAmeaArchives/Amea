@@ -15,7 +15,7 @@ const Hero = () => {
                 <Image src="/path3.svg" alt="Amea hero path one" fill className="" />
             </div>
 
-            <div className="w-[200px] h-[215px] mx-auto relative mt-12 lg:mt-24 max-sm:mt-36">
+            <div className="w-[200px] h-[215px] mx-auto relative mt-12 lg:mt-24 max-sm:mt-36 -z-10">
                 <Image
                     src="/ameaarchives.svg"
                     alt="Amea hero"

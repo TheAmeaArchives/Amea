@@ -5,19 +5,19 @@ const About = () => {
   return (
     <div className="min-h-screen flex flex-col gap-80">
       <div>
-        <div className="flex max-sm:flex-col sm:items-center gap-10">
-          <div className="editor-font font-medium leading-[100px] max-md:w-[278px] max-md:leading-[.8]">
-            <h1 className="text max-md:text-[68px] 2xl:text-9xl lg:text-[120px]">
+        <div className="flex max-lg:flex-col lg:items-center gap-y-10 lg:justify-around">
+          <div className="editor-font font-medium leading-[.9] max-lg:leading-[.8] text-[148px]">
+            <h1 className="text max-lg:text-[68px]">
               AI.
             </h1>
-            <h1 className="text max-md:text-[68px] 2xl:text-9xl lg:text-[120px]">
+            <h1 className="text max-lg:text-[68px]">
               Penicillin.
             </h1>
-            <h1 className="text max-md:text-[68px] 2xl:text-9xl lg:text-[120px]">
+            <h1 className="text max-lg:text-[68px]">
               Fire.
             </h1>
           </div>
-          <p className="flex flex-col gap-8 text-xl font-light aileron">
+          <p className="flex flex-col gap-8 text-xl font-light aileron max-w-[550px]">
             <span>
               All major innovations in history have at least one thing in
               common; they are human-centred. And it isn&apos;t a mere
@@ -44,19 +44,16 @@ const About = () => {
         </div>
       </div>
       <div>
-        <div className="flex max-sm:flex-col sm:items-center gap-10">
-          <div className="sm:hidden editor-font">
-            <h1 className="font-medium text max-md:text-[60px] relative flex flex-col leading-[.9]">
+        <div className="flex max-lg:flex-col lg:justify-around lg:items-center gap-10">
+          <div className="lg:hidden editor-font">
+            <h1 className="font-medium text text-[60px] relative flex flex-col leading-[.9]">
               <span>Innovation</span>
               <span>Behavioral</span>
               <span>Science.</span>
               <p className="text-default absolute text-7xl w-full h-full -top-6 left-0 center">&</p>
             </h1>
           </div>
-          {/*<div className="w-full h-[455px] sm:hidden relative">*/}
-          {/*  <Image fill src="/inovationbehaviouralscience.svg" alt="Innovation" />*/}
-          {/*</div>*/}
-          <p className="flex flex-col gap-8 text-xl  aileron font-light">
+          <p className="flex flex-col gap-8 text-xl w-full max-w-[520px]  aileron font-light">
             Now this begs the question “How?” Our approach to moving forward
             that mission is threefold. First, we gather all the insights from
             the sciences of human thinking and behavior. These insights, from
@@ -69,9 +66,11 @@ const About = () => {
             some ovf these innovators to push their efforts even further by
             having them consultant us and benefit from our expertise.
           </p>
-          <div className="max-sm:hidden editor-font">
-            <h1 className="font-bold text 2xl:text-9xl lg:text-8xl relative flex flex-col gap-5">
-              Innovation <span>Behavioral</span> <span>Science.</span>
+          <div className="max-lg:hidden editor-font">
+            <h1 className="font-medium text text-[148px] relative flex flex-col gap-5 leading-[.8]">
+              <span>Innovation</span>
+              <span>Behavioral</span>
+              <span>Science.</span>
               <span className="text-default absolute w-full h-full -top-16 left-0 center">
                 &
               </span>

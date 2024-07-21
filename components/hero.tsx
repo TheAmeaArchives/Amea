@@ -36,7 +36,7 @@ const Hero = () => {
             </div>
 
             {/*Mobile image*/}
-            <div className="sm:hidden absolute bottom-20 right-0 max-sm:h-[180px] max-sm:w-[200px] h-96 w-96 2xl:h-[500px] 2xl:w-[500px] overflow-hidden -z-10">
+            <div className="sm:hidden absolute bottom-0 right-0 max-sm:h-[180px] max-sm:w-[200px] h-96 w-96 2xl:h-[500px] 2xl:w-[500px] overflow-hidden -z-10">
                 <Image
                     src="/path4.svg"
                     alt="Amea hero path one"

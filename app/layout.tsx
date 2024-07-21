@@ -76,7 +76,7 @@ export default function RootLayout({
         <Navbar />
         <main
           className={cn(
-            "max-w-7xl mx-auto w-full min-h-screen py-40 px-24 max-sm:px-8"
+            "w-full min-h-screen py-40 px-[105px] max-sm:px-8"
             // myFont.className
           )}
         >

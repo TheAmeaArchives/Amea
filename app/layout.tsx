@@ -13,8 +13,16 @@ export const metadata: Metadata = {
 const aileronFont = localFont({
   src: [
     {
+      path: "../fonts/Aileron-Bold.otf",
+      weight: "700",
+    },
+    {
+      path: "../fonts/Aileron-SemiBold.otf",
+      weight: "600",
+    },
+    {
       path: "../fonts/Aileron-Regular.otf",
-      weight: "500",
+      weight: "400",
     },
     {
       path: "../fonts/Aileron-Light.otf",
@@ -29,6 +37,10 @@ const editorFont = localFont({
     {
       path: "../fonts/editor-bold.ttf",
       weight: "700",
+    },
+    {
+      path: "../fonts/editor-medium.otf",
+      weight: "500",
     },
     {
       path: "../fonts/editor-light.ttf",
@@ -64,7 +76,7 @@ export default function RootLayout({
         <Navbar />
         <main
           className={cn(
-            "max-w-7xl mx-auto w-full min-h-screen py-40 px-24 "
+            "w-full min-h-screen py-40 px-[105px] max-sm:px-8"
             // myFont.className
           )}
         >

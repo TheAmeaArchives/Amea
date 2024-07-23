@@ -15,7 +15,7 @@ const Navbar = () => {
       <>
           <div className={cn("fixed top-0 w-full h-20 bg-white max-sm:px-[30px] px-[100px]", {
               "z-[100]": !isActive,
-              "nav-active": isActive
+              "nav-active overflow-hidden": isActive
           })}>
               <nav className="h-full items-center flex justify-between  relative overflow-hidden">
                   <Logo />
@@ -79,7 +79,7 @@ const MobileLinks = ({ isActive }: { isActive: boolean }) => {
                     className={cn("fixed overflow-y-hidden inset-0 bg-white/90 w-screen h-screen transition-all duration-300 ease-in-out"
                     )}
                 >
-                    <ul className="flex flex-col gap-y-5 ml-10 mt-20 w-full z-[100]">
+                    <ul className="flex flex-col gap-y-5 ml-10 mt-20 z-[100]">
                         {navItems.map((item) => {
                             //some code here
                             const isActive = pathname === item.href;

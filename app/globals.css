@@ -86,6 +86,13 @@
     overflow: hidden;
   }
 
+  @media not all and (min-width: 768px) {
+    body:has(.nav-active) main {
+      position: relative;
+      z-index: -10;
+    }
+  }
+
   .akira {
     font-family: var(--akira-font);
   }

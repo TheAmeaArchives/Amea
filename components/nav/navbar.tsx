@@ -14,7 +14,8 @@ const Navbar = () => {
   return (
       <>
           <div className={cn("fixed top-0 w-full h-20 bg-white max-sm:px-[30px] px-[100px]", {
-              "z-[100]": !isActive
+              "z-[100]": !isActive,
+              "nav-active": isActive
           })}>
               <nav className="h-full items-center flex justify-between  relative overflow-hidden">
                   <Logo />

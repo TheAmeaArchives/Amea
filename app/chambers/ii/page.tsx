@@ -1,7 +1,7 @@
 "use client"
 import ChamberHeader from "@/components/chambers/header";
 import { constants, stats } from "@/constants";
-import React, {useEffect, useState} from "react";
+import React, {FormEventHandler, useEffect, useState} from "react";
 import { X } from "lucide-react";
 import Image from "next/image";
 
@@ -60,6 +60,11 @@ const VolunteerForm = ({ setIsVolunteerFormActive }: { setIsVolunteerFormActive:
         console.log(formState)
     }, [formState]);
 
+    const handleOnSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
+        event.preventDefault()
+        // Some code
+    }
+
     return (
         <div className="fixed w-screen h-screen bg-white z-[100] top-0 requires-no-scroll pt-56 pb-36 px-8">
 
@@ -74,13 +79,14 @@ const VolunteerForm = ({ setIsVolunteerFormActive }: { setIsVolunteerFormActive:
                 <span className="w-full flex justify-end">
                     <X className="w-5 h-5 md:w-6 md:h-6" onClick={() => setIsVolunteerFormActive(false)}/>
                 </span>
-                <form>
+                <form onSubmit={handleOnSubmit}>
                     <div className="space-y-14 mb-20">
                         <div className="flex flex-col">
                             <label className="aileron font-light" htmlFor="name">Name:</label>
                             <input
                                 className="md:text-2xl border-b border-b-black outline-none p-2 focus:border-default transition-all" id="name"
                                 onChange={e => setFormState(prev => ({...prev, name: e.target.value}))}
+                                value={formState.name}
                                 required
                             />
                         </div>
@@ -91,6 +97,7 @@ const VolunteerForm = ({ setIsVolunteerFormActive }: { setIsVolunteerFormActive:
                                 type="email"
                                 className="md:text-2xl border-b border-b-black outline-none p-2 focus:border-default transition-all"
                                 onChange={e => setFormState(prev => ({...prev, email: e.target.value}))}
+                                value={formState.email}
                                 required
                             />
                         </div>
@@ -100,6 +107,7 @@ const VolunteerForm = ({ setIsVolunteerFormActive }: { setIsVolunteerFormActive:
                                 id="whatsapp"
                                 className="md:text-2xl border-b border-b-black outline-none p-2 focus:border-default transition-all"
                                 onChange={e => setFormState(prev => ({...prev, whatsapp: e.target.value}))}
+                                value={formState.whatsapp}
                             />
                         </div>
                     </div>

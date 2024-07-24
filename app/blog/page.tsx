@@ -6,14 +6,14 @@ import Search from "@/components/chambers/search";
 const Blogs = () => {
     return (
         <div className="min-h-screen">
-            <div className="flex gap-10">
+            <div className="flex gap-10 flex-wrap justify-between">
                 <div className="flex flex-col gap-3 ">
-                    <h1 className="text-5xl font-bold akira">OUR BLOG</h1>
-                    <p className="text-2xl aileron font-light">
+                    <h1 className="text-5xl max-md:text-2xl font-bold akira">OUR BLOG</h1>
+                    <p className="md:text-2xl text-base aileron font-light">
                         A virtual research center
                     </p>
                 </div>
-                <span className="-z-10">
+                <span className="">
                     <Search mode="ICON" />
                 </span>
             </div>
@@ -27,7 +27,7 @@ const Blogs = () => {
                         <div className="flex flex-col justify-between flex-1">
                             <div className="flex justify-between ">
                                 <div className="py-3">
-                                    <p className="text-2xl max-md:text-sm font-normal ">JUNE 17, 2024</p>
+                                    <p className="text-2xl max-md:text-sm font-normal">JUNE 17, 2024</p>
                                     <h1 className="text-[40px] max-md:text-xl font-bold max-w-xl -z-10 editor-font">
                                         Letter from the editor: You Are Safe Here
                                     </h1>

@@ -7,7 +7,7 @@ const ContactForm = () => {
   return (
     <div className=" flex flex-col gap-8 font-light">
       <div className="flex flex-col gap-4">
-        <h1 className="font-bold text-5xl editor-font">Let&apos;s talk</h1>
+        <h1 className="font-bold text-5xl max-md:text-2xl editor-font">Let&apos;s talk</h1>
         <p className="">
           Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ullam esse
           quibusdam exercitationem aliquid minus ab ratione corrupti corporis?

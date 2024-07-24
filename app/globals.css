@@ -82,17 +82,6 @@
     overflow-x: hidden;
   }
 
-  @media not all and (min-width: 768px) {
-    body:has(.requires-no-scroll) {
-      overflow: hidden;
-    }
-
-    body:has(.nav-active) main {
-      position: relative;
-      z-index: -10;
-    }
-  }
-
   .akira {
     font-family: var(--akira-font);
   }
@@ -123,6 +112,27 @@
     border-radius: 50%;
   }
 
+  .circle:hover {
+    background-color: rgb(38, 38, 38);
+  }
+
+  @media not all and (min-width: 768px) {
+    body:has(.requires-no-scroll) {
+      overflow: hidden;
+    }
+
+    body:has(.nav-active) main {
+      position: relative;
+      z-index: -10;
+    }
+
+    .circle {
+      height: 110px;
+      width: 110px;
+      background: #000;
+      border-radius: 50%;
+    }
+  }
   .this {
     height: 100vh;
     width: 50%;

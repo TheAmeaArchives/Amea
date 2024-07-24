@@ -30,7 +30,7 @@ const ChamberTwo = () => {
                     <p
                         // href="/chambers/i/volunteer"
                         onClick={() => setIsVolunteerFormActive(true)}
-                        className="text-center w-[110px] md:w-[185px] text-default text-2xl max-md:text-lg pb-2 border-b-2 border-default"
+                        className="text-center w-[110px] md:w-[185px] text-default hover:text-[#e9190f]/60 text-2xl max-md:text-lg pb-2 border-b-2 border-default hover:border-[#e9190f]/80"
                     >
                         Volunteer to participate
                     </p>
@@ -79,7 +79,7 @@ const VolunteerForm = ({ setIsVolunteerFormActive }: { setIsVolunteerFormActive:
                         <div className="flex flex-col">
                             <label className="aileron font-light" htmlFor="name">Name:</label>
                             <input
-                                className="md:text-2xl border-b outline-none p-2 focus:border-default transition-all" id="name"
+                                className="md:text-2xl border-b border-b-black outline-none p-2 focus:border-default transition-all" id="name"
                                 onChange={e => setFormState(prev => ({...prev, name: e.target.value}))}
                                 required
                             />
@@ -89,7 +89,7 @@ const VolunteerForm = ({ setIsVolunteerFormActive }: { setIsVolunteerFormActive:
                             <input
                                 id="email"
                                 type="email"
-                                className="md:text-2xl border-b outline-none p-2 focus:border-default transition-all"
+                                className="md:text-2xl border-b border-b-black outline-none p-2 focus:border-default transition-all"
                                 onChange={e => setFormState(prev => ({...prev, email: e.target.value}))}
                                 required
                             />
@@ -98,7 +98,7 @@ const VolunteerForm = ({ setIsVolunteerFormActive }: { setIsVolunteerFormActive:
                             <label className="aileron font-light" htmlFor="whatsapp">WhatsApp:</label>
                             <input
                                 id="whatsapp"
-                                className="md:text-2xl border-b outline-none p-2 focus:border-default transition-all"
+                                className="md:text-2xl border-b border-b-black outline-none p-2 focus:border-default transition-all"
                                 onChange={e => setFormState(prev => ({...prev, whatsapp: e.target.value}))}
                             />
                         </div>
@@ -106,7 +106,7 @@ const VolunteerForm = ({ setIsVolunteerFormActive }: { setIsVolunteerFormActive:
                     <div className="w-fit mx-auto">
                         <button
                             type="submit"
-                            className="p-[5px] px-6 bg-default hover:bg-default/90 text-white rounded-sm font-medium"
+                            className="p-[5px] px-6 bg-default hover:bg-default/90 text-white rounded-sm font-medium hover:bg-[#e9190f]/80"
                         >
                             Submit
                         </button>

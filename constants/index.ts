@@ -119,5 +119,5 @@ export const pathsHavingBackButton = [
     '/chambers/i',
     '/chambers/ii',
     '/chambers/iii',
-    '/contributors'
+    '/contributors',
 ]

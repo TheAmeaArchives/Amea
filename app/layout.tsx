@@ -68,7 +68,7 @@ export default function RootLayout({
 }>) {
 
     const pathname = headers().get('x-url');
-    const pathHasBackButton = pathsHavingBackButton.includes(pathname)
+    const pathHasBackButton = pathsHavingBackButton.includes(pathname) || pathname.match(/^\/contributors(?:\/[^\/]+)?$/)
 
     return (
         <html

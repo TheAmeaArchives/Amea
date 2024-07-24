@@ -82,11 +82,11 @@
     overflow-x: hidden;
   }
 
-  body:has(.requires-no-scroll) {
-    overflow: hidden;
-  }
-
   @media not all and (min-width: 768px) {
+    body:has(.requires-no-scroll) {
+      overflow: hidden;
+    }
+
     body:has(.nav-active) main {
       position: relative;
       z-index: -10;

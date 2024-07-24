@@ -11,7 +11,7 @@ const Back = () => {
       className="h-10 w-10 center duration-300 transition-all"
       onClick={() => router.back()}
     >
-      <ArrowLeft className="w-4 h-4" />
+      <ArrowLeft className="w-9 h-9 md:w-14 md:h-14" />
     </button>
   );
 };

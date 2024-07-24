@@ -4,86 +4,104 @@ import Navbar from "@/components/nav/navbar";
 import Footer from "@/components/footer";
 import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
+import {pathsHavingBackButton} from "@/constants";
+import {headers} from "next/headers";
+import Back from "@/components/back";
 
 export const metadata: Metadata = {
-  title: "The Amea Archives",
-  description: "Write the content not the code",
+    title: "The Amea Archives",
+    description: "Write the content not the code",
 };
 
 const aileronFont = localFont({
-  src: [
-    {
-      path: "../fonts/Aileron-Bold.otf",
-      weight: "700",
-    },
-    {
-      path: "../fonts/Aileron-SemiBold.otf",
-      weight: "600",
-    },
-    {
-      path: "../fonts/Aileron-Regular.otf",
-      weight: "400",
-    },
-    {
-      path: "../fonts/Aileron-Light.otf",
-      weight: "300",
-    },
-  ],
-  variable: "--aileron-font",
+    src: [
+        {
+            path: "../fonts/Aileron-Bold.otf",
+            weight: "700",
+        },
+        {
+            path: "../fonts/Aileron-SemiBold.otf",
+            weight: "600",
+        },
+        {
+            path: "../fonts/Aileron-Regular.otf",
+            weight: "400",
+        },
+        {
+            path: "../fonts/Aileron-Light.otf",
+            weight: "300",
+        },
+    ],
+    variable: "--aileron-font",
 });
 
 const editorFont = localFont({
-  src: [
-    {
-      path: "../fonts/editor-bold.ttf",
-      weight: "700",
-    },
-    {
-      path: "../fonts/editor-medium.otf",
-      weight: "500",
-    },
-    {
-      path: "../fonts/editor-light.ttf",
-      weight: "300",
-    },
-    {
-      path: "../fonts/editor-thin.ttf",
-      weight: "100",
-    },
-  ],
-  variable: "--editor-font",
+    src: [
+        {
+            path: "../fonts/editor-bold.ttf",
+            weight: "700",
+        },
+        {
+            path: "../fonts/editor-medium.otf",
+            weight: "500",
+        },
+        {
+            path: "../fonts/editor-light.ttf",
+            weight: "300",
+        },
+        {
+            path: "../fonts/editor-thin.ttf",
+            weight: "100",
+        },
+    ],
+    variable: "--editor-font",
 });
 const akiraFont = localFont({
-  src: "../fonts/akira-word.otf",
-  variable: "--akira-font",
+    src: "../fonts/akira-word.otf",
+    variable: "--akira-font",
 });
 
 export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
+                                       children,
+                                   }: Readonly<{
+    children: React.ReactNode;
 }>) {
-  return (
-    <html
-      lang="en"
-      className={cn(
-        aileronFont.variable,
-        editorFont.variable,
-        akiraFont.variable
-      )}
-    >
-      <body>
-        <Navbar />
-        <main
-          className={cn(
-            "w-full min-h-screen py-40 px-[105px] max-sm:px-8"
-            // myFont.className
-          )}
+
+    const pathname = headers().get('x-url');
+    const pathHasBackButton = pathsHavingBackButton.includes(pathname)
+
+    return (
+        <html
+            lang="en"
+            className={cn(
+                aileronFont.variable,
+                editorFont.variable,
+                akiraFont.variable
+            )}
         >
-          {children}
-        </main>
-        <Footer />
-      </body>
-    </html>
-  );
+            <body>
+                <Navbar />
+                <main className={cn("w-full min-h-screen px-[105px] max-sm:px-8", {
+                    "py-40 pt-48 md:pt-80": !pathHasBackButton,
+                    "py-20": pathHasBackButton,
+                })}>
+                    {!pathHasBackButton ? (
+                        <>
+                            {children}
+                        </>
+                    ) : (
+                        <>
+                            <Back />
+                            <div className="mt-[85px] md:mt-40">
+                                {children}
+                            </div>
+                        </>
+                    )}
+                </main>
+
+
+                <Footer />
+            </body>
+        </html>
+    );
 }

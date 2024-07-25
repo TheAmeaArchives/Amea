@@ -4,9 +4,11 @@ import { constants, stats } from "@/constants";
 import React, {FormEventHandler, useEffect, useState} from "react";
 import { X } from "lucide-react";
 import Image from "next/image";
+import ValidationPage from "@/components/validation";
 
 const ChamberTwo = () => {
     const [isVolunteerFormActive, setIsVolunteerFormActive] = useState(false)
+    const [isValidationPageActive, setIsValidationPageActive] = useState(false)
 
     return (
         <div className="flex flex-col gap-10">
@@ -35,7 +37,8 @@ const ChamberTwo = () => {
                         Volunteer to participate
                     </p>
                 </div>
-                {isVolunteerFormActive && <VolunteerForm setIsVolunteerFormActive={setIsVolunteerFormActive} />}
+                {isVolunteerFormActive && <VolunteerForm setIsVolunteerFormActive={setIsVolunteerFormActive} setIsValidationPageActive={setIsValidationPageActive} />}
+                {isValidationPageActive && !isVolunteerFormActive && <ValidationPage />}
             </div>
             <div className="flex flex-col gap-20 mt-20">
                 {constants.map((constant) => (
@@ -49,7 +52,7 @@ const ChamberTwo = () => {
     );
 };
 
-const VolunteerForm = ({ setIsVolunteerFormActive }: { setIsVolunteerFormActive: (value: (((prevState: boolean) => boolean) | boolean)) => void }) => {
+const VolunteerForm = ({ setIsVolunteerFormActive, setIsValidationPageActive }: { setIsVolunteerFormActive: ((value:  boolean) => void), setIsValidationPageActive: (value:  boolean) => void  }) => {
     const [formState, setFormState] = useState({
         name: "",
         email: "",
@@ -63,6 +66,8 @@ const VolunteerForm = ({ setIsVolunteerFormActive }: { setIsVolunteerFormActive:
     const handleOnSubmit: FormEventHandler<HTMLFormElement> = async (event) => {
         event.preventDefault()
         // Some code
+        setIsVolunteerFormActive(false);
+        setIsValidationPageActive(true);
     }
 
     return (

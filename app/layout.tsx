@@ -4,9 +4,10 @@ import Navbar from "@/components/nav/navbar";
 import Footer from "@/components/footer";
 import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
-import {pathsHavingBackButton} from "@/constants";
+import { pathsHavingBackButton } from "@/constants";
 import {headers} from "next/headers";
 import Back from "@/components/back";
+import { matchesAny } from "@/constants/functions";
 
 export const metadata: Metadata = {
     title: "The Amea Archives",
@@ -68,7 +69,7 @@ export default function RootLayout({
 }>) {
 
     const pathname = headers().get('x-url');
-    const pathHasBackButton = pathsHavingBackButton.includes(pathname) || pathname.match(/^\/contributors(?:\/[^\/]+)?$/)
+    const pathHasBackButton = matchesAny(pathname, pathsHavingBackButton);
 
     return (
         <html

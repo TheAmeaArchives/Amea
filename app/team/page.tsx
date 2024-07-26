@@ -56,18 +56,30 @@ const Teams = () => {
                         </p>
                     </div>
                     <div className="max-w-4xl mx-auto w-full md:grid md:grid-cols-3 md:gap-5 max-md:space-y-7 relative">
-                        <div className="relative h-72"><Image src="/girl.svg" alt="Amea project contributor" className="object-cover" fill /></div>
-                        <div className="relative h-72"><Image src="/girl.svg" alt="Amea project contributor" className="object-cover" fill /></div>
-                        <div className="relative h-72 max-md:hidden"><Image src="/girl.svg" alt="Amea project contributor" className="object-cover" fill /></div>
-                        <div className="relative h-72 max-md:hidden"><Image src="/girl.svg" alt="Amea project contributor" className="object-cover" fill /></div>
-                        <div className="relative h-72 max-md:hidden"><Image src="/girl.svg" alt="Amea project contributor" className="object-cover" fill /></div>
-                        <div className="relative h-72 max-md:hidden"><Image src="/girl.svg" alt="Amea project contributor" className="object-cover" fill /></div>
-                        <Link
+                        <a href={"/contributors/1"} className="block w-full">
+                            <div className="relative h-72"><Image src="/girl.svg" alt="Amea project contributor" className="object-cover" fill /></div>
+                        </a>
+                        <a href={"/contributors/2"} className="block w-full">
+                            <div className="relative h-72"><Image src="/girl.svg" alt="Amea project contributor" className="object-cover" fill /></div>
+                        </a>
+                        <a href={"/contributors/3"} className="block w-full">
+                            <div className="relative h-72 max-md:hidden"><Image src="/girl.svg" alt="Amea project contributor" className="object-cover" fill /></div>
+                        </a>
+                        <a href={"/contributors/4"} className="block w-full">
+                            <div className="relative h-72 max-md:hidden"><Image src="/girl.svg" alt="Amea project contributor" className="object-cover" fill /></div>
+                        </a>
+                        <a href={"/contributors/5"} className="block w-full">
+                            <div className="relative h-72 max-md:hidden"><Image src="/girl.svg" alt="Amea project contributor" className="object-cover" fill /></div>
+                        </a>
+                        <a href={"/contributors/6"} className="block w-full">
+                            <div className="relative h-72 max-md:hidden"><Image src="/girl.svg" alt="Amea project contributor" className="object-cover" fill /></div>
+                        </a>
+                        <a
                             href={"/contributors"}
                             className="h-14 w-14 bg-white rounded-full absolute max-md:top-1/2 md:bottom-5 -right-7 max-md:-translate-y-[60px] z-10 shadow-[0px_0px_5px_5px_rgba(0,0,0,0.15)] center"
                         >
                             <ArrowRight className="w-7 h-7 text-default cursor-pointer" />
-                        </Link>
+                        </a>
                     </div>
                 </div>
                 <div className="flex flex-col gap-16">

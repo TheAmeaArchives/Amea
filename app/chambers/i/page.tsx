@@ -23,14 +23,17 @@ const ChamberOne = () => {
                         <div className="w-full flex min-h-24 h-full max-h-28">
                             <div className="flex-1">
                                 <div className="flex flex-col gap-2">
-                                    <h1 className="text-2xl line-clamp-4 font-bold aileron">
-                                        {index % 2 === 0 ? (
-                                            "'Shoking' Obidience"
-                                        ) : (
-                                            "The Mozart Effect | Rauscher, Shaw, Ky | Stanford University, California | 1993."
-                                        )}
+                                    <Link href={`i/experiments/${index}`} className="block">
+                                        <h1 className="text-2xl line-clamp-4 font-bold aileron">
+                                            {index % 2 === 0 ? (
+                                                "'Shoking' Obidience"
+                                            ) : (
+                                                "The Mozart Effect | Rauscher, Shaw, Ky | Stanford University, California | 1993."
+                                            )}
 
-                                    </h1>
+                                        </h1>
+                                    </Link>
+
                                 </div>
                             </div>
                             <div className="min-h-24 h-full max-h-28 flex flex-col justify-between">
@@ -52,14 +55,17 @@ const ChamberOne = () => {
                     >
                         <div className="w-full flex h-full items-center gap-20">
                             <div className="flex-1">
-                                <div className="flex flex-col gap-2">
-                                    <h1 className="text-[32px] font-bold aileron">
-                                        &apos;Shoking&apos; Obidience
-                                    </h1>
-                                    <h1 className="text-[32px] font-bold aileron">
-                                        | Milgram Experiment
-                                    </h1>
-                                </div>
+                                <Link href={`i/experiments/${index}`} className="block">
+                                    <div className="flex flex-col gap-2">
+                                        <h1 className="text-[32px] font-bold aileron">
+                                            &apos;Shoking&apos; Obidience
+                                        </h1>
+                                        <h1 className="text-[32px] font-bold aileron">
+                                            | Milgram Experiment
+                                        </h1>
+
+                                    </div>
+                                </Link>
                                 <div className="flex justify-between text-zinc-500 capitalize">
                                     <span>tag</span>
                                     <span>tag</span>

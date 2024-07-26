@@ -46,7 +46,7 @@ const IndividualContributorPage = ({ params } : { params : { name: string } }) =
                     {Array.from({ length: 3 }).map((_, index) => (
                         <div
                             key={index}
-                            className="pt-4 border-t-2 md:border-t-[9px] w-full border-t-black/10 max-w-xl md:space-y-3"
+                            className="pt-4 border-t-2 md:border-t-[9px] w-full border-t-black/10 md:w-[36rem] md:space-y-3"
                         >
                             <h1 className="text-xl md:text-[32px] md:leading-[2.25rem] font-bold max-w-xl editor-font">Letter from the editor: You Are Safe Here</h1>
                             <p className="text-base max-md:text-sm aileron font-normal">JUNE 17, 2024</p>

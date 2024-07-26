@@ -4,9 +4,10 @@ import Navbar from "@/components/nav/navbar";
 import Footer from "@/components/footer";
 import localFont from "next/font/local";
 import { cn } from "@/lib/utils";
-import {pathsHavingBackButton} from "@/constants";
+import { pathsHavingBackButton } from "@/constants";
 import {headers} from "next/headers";
 import Back from "@/components/back";
+import { matchesAny } from "@/constants/functions";
 
 export const metadata: Metadata = {
     title: "The Amea Archives",
@@ -38,19 +39,19 @@ const aileronFont = localFont({
 const editorFont = localFont({
     src: [
         {
-            path: "../fonts/editor-bold.ttf",
+            path: "../fonts/Editor'sNote-Bold.ttf",
             weight: "700",
         },
         {
-            path: "../fonts/editor-medium.otf",
+            path: "../fonts/Editor'sNote-Medium.ttf",
             weight: "500",
         },
         {
-            path: "../fonts/editor-light.ttf",
+            path: "../fonts/Editor'sNote-Light.ttf",
             weight: "300",
         },
         {
-            path: "../fonts/editor-thin.ttf",
+            path: "../fonts/Editor'sNote-Thin.ttf",
             weight: "100",
         },
     ],
@@ -68,7 +69,7 @@ export default function RootLayout({
 }>) {
 
     const pathname = headers().get('x-url');
-    const pathHasBackButton = pathsHavingBackButton.includes(pathname)
+    const pathHasBackButton = matchesAny(pathname, pathsHavingBackButton);
 
     return (
         <html

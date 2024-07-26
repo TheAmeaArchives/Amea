@@ -13,7 +13,7 @@ const Contributors = () => {
                 <div className="flex flex-col md:grid md:grid-cols-3 max-md:gap-y-8 gap-10">
                     {Array.from({ length: 12 }).map((_, index) => (
                         <Link
-                            href={`/member/${index + 1}`}
+                            href={`/contributors/${index + 1}`}
                             className="w-full group"
                             key={index}
                         >

@@ -115,9 +115,10 @@ export const constants = [
   },
 ];
 
-export const pathsHavingBackButton = [
+export const pathsHavingBackButton: (string | RegExp)[] = [
     '/chambers/i',
     '/chambers/ii',
     '/chambers/iii',
-    '/contributors'
+    /^\/contributors(?:\/[^\/]+)?$/,
+    /^\/chambers\/i\/experiments(?:\/[^\/]+)?$/,
 ]

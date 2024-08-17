@@ -69,7 +69,7 @@ export default function RootLayout({
 }>) {
 
     const pathname = headers().get('x-url');
-    const pathHasBackButton = matchesAny(pathname, pathsHavingBackButton);
+    const pathHasBackButton = matchesAny(pathname as string, pathsHavingBackButton);
 
     return (
         <html

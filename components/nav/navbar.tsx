@@ -15,12 +15,12 @@ const Navbar = () => {
       <>
           <div className={cn("fixed top-0 w-full h-20 bg-white max-sm:px-[30px] px-[100px]", {
               "z-[100]": !isActive,
-              "nav-active overflow-hidden": isActive
+              "max-sm:nav-active overflow-hidden": isActive
           })}>
               <nav className="h-full items-center flex justify-between  relative overflow-hidden">
                   <Logo />
-                  <Links isActive={isActive} />
-                  <MobileLinks isActive={isActive} />
+                  <Links isActive={isActive} setIsActive={setIsActive} />
+                  <MobileLinks isActive={isActive} setIsActive={setIsActive} />
                   <Hamburger setIsActive={setIsActive} isActive={isActive} />
               </nav>
           </div>
@@ -28,7 +28,7 @@ const Navbar = () => {
   );
 };
 
-const Links = ({ isActive }: { isActive: boolean }) => {
+const Links = ({ isActive, setIsActive }: { isActive: boolean, setIsActive: (value: boolean) => void }) => {
   const pathname = usePathname();
   return (
       <>
@@ -53,7 +53,7 @@ const Links = ({ isActive }: { isActive: boolean }) => {
                               })}
                               key={item.title}
                           >
-                              <Link href={item.href} className={cn("capitalize ")}>
+                              <Link href={item.href} className={cn("capitalize")} onClick={() => setIsActive(false)} prefetch={false}>
                                   {item.title}
                               </Link>
                           </li>
@@ -65,14 +65,14 @@ const Links = ({ isActive }: { isActive: boolean }) => {
   );
 };
 
-const MobileLinks = ({ isActive }: { isActive: boolean }) => {
+const MobileLinks = ({ isActive, setIsActive }: { isActive: boolean, setIsActive: (value: boolean) => void }) => {
     const pathname = usePathname();
     return (
         // Mobile view
         <div
             className={cn("sm:hidden", {
                 "max-sm:hidden": !isActive,
-                "requires-no-scroll": isActive
+                "max-sm:requires-no-scroll": isActive
             })}
         >
                 <div
@@ -91,7 +91,7 @@ const MobileLinks = ({ isActive }: { isActive: boolean }) => {
                                     })}
                                     key={item.title}
                                 >
-                                    <Link href={item.href} className={cn("uppercase text-xl")}>
+                                    <Link href={item.href} className={cn("uppercase text-xl")} onClick={() => setIsActive(false)} prefetch={false}>
                                         {item.title}
                                     </Link>
                                 </li>

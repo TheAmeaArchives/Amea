@@ -7,7 +7,9 @@ const Insights = () => {
         <h1 className="text-[32px] max-md:text-xl font-normal text-center">
             When you are asked what Amea is all about during the talk. Respond exactly with <br /> 
             <em>
-                "It's all about insights"
+                <strong>
+                    It&apos;s all about insights
+                </strong>
             </em>
         </h1>
       </div>

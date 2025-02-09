@@ -5,7 +5,7 @@ const Insights = () => {
     <div className="flex flex-col gap-10 ">
      <div className="center ">
         <h1 className="text-[32px] max-md:text-xl font-normal text-center">
-            Keep this code jealously.. it gives you additional food... take it with you 🍲
+            Keep this code jealously... it gives you additional food... take it with you 🍲
         </h1>
       </div>
     </div>

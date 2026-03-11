@@ -19,37 +19,33 @@ const Archives = () => {
             </div>
 
             {/*Desktop view*/}
-            <div className="absolute this overflow-hidden max-md:hidden font-light aileron">
+            <div className="absolute this max-md:hidden font-light aileron">
                 <Image
                     src="/triangle.svg"
                     alt="theAmeaarchives chamber folder"
                     fill
-                    className=" translate-x-10 absolute object-contain"
+                    className="absolute object-contain"
                 />
 
-                <div className="absolute bottom-0 right-0 w-[63%]  h-1/2">
-                    <div className="relative h-full w-full">
-                        <div className="circle absolute right-0 center">
-                            <a href={"/chambers/i"} className="text-white">
-                                Chamber I
-                            </a>
-                        </div>
-                        <div className="circle absolute top-0 bottom-0 bg-black my-auto center">
-                            <a href={"/chambers/ii"} className="text-white">
-                                Chamber II
-                            </a>
-                        </div>
-                        <div className="absolute bottom-20 right-4">
-                            <a href={`/chambers/iii`} className="text-white">
-                                Chamber III
-                            </a>
-                        </div>
-                    </div>
+                <div className="circle absolute top-[50%] right-[14%] center">
+                    <a href={"/chambers/i"} className="text-white">
+                        Chamber I
+                    </a>
+                </div>
+                <div className="circle absolute top-[64%] left-[27%] center">
+                    <a href={"/chambers/ii"} className="text-white">
+                        Chamber II
+                    </a>
+                </div>
+                <div className="circle absolute bottom-[0%] right-[22%] center">
+                    <a href={`/chambers/iii`} className="text-white">
+                        Chamber III
+                    </a>
                 </div>
             </div>
 
             {/*Mobile view*/}
-            <div className="h-[450px] mt-5 relative overflow-hidden md:hidden aileron font-light -right-9">
+            <div className="h-[450px] mt-5 relative md:hidden aileron font-light">
                 <Image
                     src="/triangle1.svg"
                     alt="theAmeaarchives chamber folder"

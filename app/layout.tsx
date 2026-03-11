@@ -8,6 +8,7 @@ import { pathsHavingBackButton } from "@/constants";
 import {headers} from "next/headers";
 import Back from "@/components/back";
 import { matchesAny } from "@/constants/functions";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
     title: "The Amea Archives",
@@ -69,7 +70,8 @@ export default function RootLayout({
 }>) {
 
     const pathname = headers().get('x-url');
-    const pathHasBackButton = matchesAny(pathname as string, pathsHavingBackButton);
+    const isAdmin = pathname?.startsWith('/admin');
+    const pathHasBackButton = !isAdmin && matchesAny(pathname as string, pathsHavingBackButton);
 
     return (
         <html
@@ -81,27 +83,35 @@ export default function RootLayout({
             )}
         >
             <body>
-                <Navbar />
-                <main className={cn("w-full min-h-screen px-[105px] max-sm:px-8", {
-                    "py-40 pt-48 md:pt-80": !pathHasBackButton,
-                    "py-20": pathHasBackButton,
-                })}>
-                    {!pathHasBackButton ? (
-                        <>
-                            {children}
-                        </>
-                    ) : (
-                        <>
-                            <Back />
-                            <div className="mt-[85px] md:mt-40">
-                                {children}
-                            </div>
-                        </>
-                    )}
-                </main>
-
-
-                <Footer />
+                {isAdmin ? (
+                    <>
+                        {children}
+                        <Toaster />
+                    </>
+                ) : (
+                    <>
+                        <Navbar />
+                        <main className={cn("w-full min-h-screen px-[105px] max-sm:px-8", {
+                            "py-40 pt-48 md:pt-80": !pathHasBackButton,
+                            "py-20": pathHasBackButton,
+                        })}>
+                            {!pathHasBackButton ? (
+                                <>
+                                    {children}
+                                </>
+                            ) : (
+                                <>
+                                    <Back />
+                                    <div className="mt-[85px] md:mt-40">
+                                        {children}
+                                    </div>
+                                </>
+                            )}
+                        </main>
+                        <Footer />
+                        <Toaster />
+                    </>
+                )}
             </body>
         </html>
     );

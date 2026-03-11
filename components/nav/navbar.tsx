@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Logo from "../logo";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -11,11 +11,38 @@ import Footer from "@/components/footer";
 
 const Navbar = () => {
   const [isActive, setIsActive] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY <= 50) {
+        setIsVisible(true);
+        setIsActive(true);
+      } else if (currentScrollY < lastScrollY) {
+        setIsVisible(true);
+        setIsActive(false);
+      } else if (currentScrollY > lastScrollY) {
+        setIsVisible(false);
+        setIsActive(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
   return (
       <>
-          <div className={cn("fixed top-0 w-full h-20 bg-white max-sm:px-[30px] px-[100px]", {
+          <div className={cn("fixed top-0 w-full h-20 bg-white max-sm:px-[30px] px-[100px] transition-transform duration-300", {
               "z-[100]": !isActive,
-              "max-sm:nav-active overflow-hidden": isActive
+              "max-sm:nav-active overflow-hidden": isActive,
+              "translate-y-0": isVisible,
+              "-translate-y-full": !isVisible
           })}>
               <nav className="h-full items-center flex justify-between  relative overflow-hidden">
                   <Logo />

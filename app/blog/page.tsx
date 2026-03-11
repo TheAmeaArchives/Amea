@@ -2,8 +2,19 @@ import Link from "next/link";
 import React from "react";
 import { ArrowRight, EllipsisVertical } from "lucide-react";
 import Search from "@/components/chambers/search";
+import { createClient } from "@/lib/supabase/server";
+import type { BlogPost } from "@/lib/types";
 
-const Blogs = () => {
+const Blogs = async () => {
+    const supabase = createClient();
+    const { data: posts } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .eq("published", true)
+        .order("created_at", { ascending: false });
+
+    const hasPosts = posts && posts.length > 0;
+
     return (
         <div className="min-h-screen">
             <div className="flex gap-10 flex-wrap justify-between">
@@ -18,32 +29,53 @@ const Blogs = () => {
                 </span>
             </div>
             <div className="flex flex-col gap-20 mt-20">
-                {Array.from({ length: 10 }).map((_, index) => (
-                    <div
-                        key={index}
-                        className="-z-10 relative after:absolute after:h-2 w-full flex max-md:flex-col after:-bottom-10 gap-5 after:w-full after:left-0 after:bg-black/10 after:-z-10"
-                    >
-                        <div className="bg-default h-60 w-full max-w-96" />
-                        <div className="flex flex-col justify-between flex-1">
-                            <div className="flex justify-between ">
-                                <div className="py-3">
-                                    <p className="text-2xl max-md:text-sm font-normal">JUNE 17, 2024</p>
-                                    <h1 className="text-[40px] max-md:text-xl font-bold max-w-xl -z-10 editor-font">
-                                        Letter from the editor: You Are Safe Here
-                                    </h1>
+                {hasPosts ? (
+                    (posts as BlogPost[]).map((post) => (
+                        <div
+                            key={post.id}
+                            className="-z-10 relative after:absolute after:h-2 w-full flex max-md:flex-col after:-bottom-10 gap-5 after:w-full after:left-0 after:bg-black/10 after:-z-10"
+                        >
+                            {post.cover_image_url ? (
+                                <img
+                                    src={post.cover_image_url}
+                                    alt={post.title}
+                                    className="h-60 w-full max-w-96 object-cover"
+                                />
+                            ) : (
+                                <div className="bg-default h-60 w-full max-w-96" />
+                            )}
+                            <div className="flex flex-col justify-between flex-1">
+                                <div className="flex justify-between ">
+                                    <div className="py-3">
+                                        <p className="text-2xl max-md:text-sm font-normal">
+                                            {new Date(post.created_at).toLocaleDateString("en-US", {
+                                                month: "long",
+                                                day: "numeric",
+                                                year: "numeric",
+                                            }).toUpperCase()}
+                                        </p>
+                                        <h1 className="text-[40px] max-md:text-xl font-bold max-w-xl -z-10 editor-font">
+                                            {post.title}
+                                        </h1>
+                                    </div>
+                                    <EllipsisVertical className="cursor-pointer" />
                                 </div>
-                                <EllipsisVertical className="cursor-pointer" />
+                                <Link
+                                    href={`/blog/${post.slug}`}
+                                    className="flex items-center gap-3 "
+                                >
+                                    <span className="text-2xl max-md:text-sm">READ MORE</span>
+                                    <ArrowRight className="w-6 h-6" />
+                                </Link>
                             </div>
-                            <Link
-                                href={`/blog/${index}`}
-                                className="flex items-center gap-3 "
-                            >
-                                <span className="text-2xl max-md:text-sm">READ MORE</span>
-                                <ArrowRight className="w-6 h-6" />
-                            </Link>
                         </div>
+                    ))
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                        <p className="text-xl text-gray-500 aileron">No blog posts published yet.</p>
+                        <p className="text-sm text-gray-400 mt-2">Check back soon for new content.</p>
                     </div>
-                ))}
+                )}
             </div>
             <div className="flex py-20 flex-col gap-5">
                 <h1 className="text-3xl max-md:text-base max-md:w-64 font-bold max-w-xl -z-10 editor-font">

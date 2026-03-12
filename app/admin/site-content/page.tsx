@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import type { SiteContent } from "@/lib/types";
+import { SITE_CONTENT_SECTIONS } from "@/lib/types";
 import SiteContentClient from "./site-content-client";
 
 export default async function SiteContentAdminPage() {
@@ -16,5 +17,5 @@ export default async function SiteContentAdminPage() {
     redirect("/admin");
   }
 
-  return <SiteContentClient entries={(data as SiteContent[]) ?? []} />;
+  return <SiteContentClient entries={(data as SiteContent[]) ?? []} sections={SITE_CONTENT_SECTIONS} />;
 }

@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Plus } from "lucide-react";
-import type { SiteContent } from "@/lib/types";
+import { Save, ChevronDown, ChevronRight, Globe, FileText, Users, Archive, Beaker, BookOpen, Layers, Image as ImageIcon, Mail, UserCircle, Share2 } from "lucide-react";
+import type { SiteContent, ContentSection, SITE_CONTENT_SECTIONS } from "@/lib/types";
 import { toast } from "@/lib/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
@@ -16,52 +15,67 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { upsertSiteContent } from "@/app/admin/actions/site-content";
 
-const PREDEFINED_KEYS: { key: string; label: string; description: string }[] = [
-  { key: "hero_title", label: "Hero Title", description: "Main headline on the homepage hero section" },
-  { key: "hero_subtitle", label: "Hero Subtitle", description: "Subtitle text below the hero title" },
-  { key: "about_mission", label: "About — Mission", description: "Mission statement on the about page" },
-  { key: "about_how", label: "About — How We Work", description: "Description of how the organization works" },
-  { key: "about_approach", label: "About — Approach", description: "The approach section on the about page" },
-  { key: "about_insights", label: "About — Insights", description: "Insights section on the about page" },
-];
+const PAGE_ICONS: Record<string, React.ReactNode> = {
+  'Homepage': <Globe className="h-5 w-5" />,
+  'Team': <Users className="h-5 w-5" />,
+  'Archives': <Archive className="h-5 w-5" />,
+  'Chambers': <Beaker className="h-5 w-5" />,
+  'Blog': <BookOpen className="h-5 w-5" />,
+  'Programs': <Layers className="h-5 w-5" />,
+  'Gallery': <ImageIcon className="h-5 w-5" />,
+  'Contact': <Mail className="h-5 w-5" />,
+  'Contributors': <UserCircle className="h-5 w-5" />,
+  'Social Links': <Share2 className="h-5 w-5" />,
+};
 
 interface SiteContentClientProps {
   entries: SiteContent[];
+  sections: ContentSection[];
 }
 
-export default function SiteContentClient({ entries }: SiteContentClientProps) {
+export default function SiteContentClient({ entries, sections }: SiteContentClientProps) {
   const router = useRouter();
   const entryMap = Object.fromEntries(entries.map((e) => [e.key, e.value ?? ""]));
 
   const [values, setValues] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
-    for (const { key } of PREDEFINED_KEYS) {
-      initial[key] = entryMap[key] ?? "";
-    }
-    for (const entry of entries) {
-      if (!initial[entry.key]) {
-        initial[entry.key] = entry.value ?? "";
+    for (const section of sections) {
+      for (const { key } of section.keys) {
+        initial[key] = entryMap[key] ?? "";
       }
     }
     return initial;
   });
 
   const [savingKey, setSavingKey] = useState<string | null>(null);
-  const [newKey, setNewKey] = useState("");
-  const [newValue, setNewValue] = useState("");
-  const [addingNew, setAddingNew] = useState(false);
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set());
 
-  const predefinedKeySet = new Set(PREDEFINED_KEYS.map((k) => k.key));
-  const additionalKeys = Object.keys(values).filter((k) => !predefinedKeySet.has(k));
+  const pages = Array.from(new Set(sections.map(s => s.page)));
+
+  const toggleSection = (sectionId: string) => {
+    setOpenSections(prev => {
+      const next = new Set(prev);
+      if (next.has(sectionId)) {
+        next.delete(sectionId);
+      } else {
+        next.add(sectionId);
+      }
+      return next;
+    });
+  };
 
   async function handleSave(key: string) {
     setSavingKey(key);
     try {
       await upsertSiteContent(key, values[key]);
-      toast({ title: "Saved", description: `"${key}" updated successfully.` });
+      toast({ title: "Saved", description: "Content updated successfully." });
       router.refresh();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
@@ -70,150 +84,109 @@ export default function SiteContentClient({ entries }: SiteContentClientProps) {
     }
   }
 
-  async function handleAddNew() {
-    const trimmedKey = newKey.trim().toLowerCase().replace(/\s+/g, "_");
-    if (!trimmedKey) {
-      toast({ title: "Key is required", variant: "destructive" });
-      return;
-    }
-    if (values[trimmedKey] !== undefined) {
-      toast({ title: "Key already exists", variant: "destructive" });
-      return;
-    }
-
-    setAddingNew(true);
+  async function handleSaveSection(sectionKeys: string[]) {
+    setSavingKey("section");
     try {
-      await upsertSiteContent(trimmedKey, newValue);
-      setValues((prev) => ({ ...prev, [trimmedKey]: newValue }));
-      setNewKey("");
-      setNewValue("");
-      toast({ title: "Created", description: `"${trimmedKey}" added successfully.` });
+      for (const key of sectionKeys) {
+        await upsertSiteContent(key, values[key]);
+      }
+      toast({ title: "Saved", description: "All content in this section updated." });
       router.refresh();
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
-      setAddingNew(false);
+      setSavingKey(null);
     }
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Site Content</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Edit Website Content</h1>
         <p className="text-muted-foreground mt-1">
-          Edit text content displayed across the public website.
+          Modify all text and information displayed on the public website. Changes are saved immediately.
         </p>
       </div>
 
-      <div className="grid gap-4">
-        {PREDEFINED_KEYS.map(({ key, label, description }) => (
-          <Card key={key}>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">{label}</CardTitle>
-              <CardDescription>{description}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Textarea
-                rows={4}
-                value={values[key]}
-                onChange={(e) =>
-                  setValues((prev) => ({ ...prev, [key]: e.target.value }))
-                }
-                placeholder={`Enter ${label.toLowerCase()}...`}
-              />
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  onClick={() => handleSave(key)}
-                  disabled={savingKey === key}
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {savingKey === key ? "Saving..." : "Save"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-4">
+        {pages.map(page => {
+          const pageSections = sections.filter(s => s.page === page);
+          
+          return (
+            <Card key={page} className="overflow-hidden">
+              <CardHeader className="bg-muted/50 py-4">
+                <div className="flex items-center gap-3">
+                  {PAGE_ICONS[page] || <FileText className="h-5 w-5" />}
+                  <CardTitle className="text-lg">{page}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                {pageSections.map((section, idx) => {
+                  const sectionId = `${page}-${idx}`;
+                  const isOpen = openSections.has(sectionId);
+                  
+                  return (
+                    <Collapsible key={sectionId} open={isOpen} onOpenChange={() => toggleSection(sectionId)}>
+                      <CollapsibleTrigger className="flex w-full items-center justify-between p-4 hover:bg-muted/30 transition-colors border-t first:border-t-0">
+                        <div className="text-left">
+                          <h3 className="font-medium">{section.label}</h3>
+                          <p className="text-sm text-muted-foreground">{section.description}</p>
+                        </div>
+                        {isOpen ? (
+                          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="px-4 pb-4 space-y-4 bg-muted/10">
+                          {section.keys.map(({ key, label, type }) => (
+                            <div key={key} className="space-y-2">
+                              <label className="text-sm font-medium text-foreground">
+                                {label}
+                              </label>
+                              {type === 'textarea' ? (
+                                <Textarea
+                                  rows={4}
+                                  value={values[key]}
+                                  onChange={(e) =>
+                                    setValues((prev) => ({ ...prev, [key]: e.target.value }))
+                                  }
+                                  placeholder={`Enter ${label.toLowerCase()}...`}
+                                  className="bg-background"
+                                />
+                              ) : (
+                                <Input
+                                  type={type}
+                                  value={values[key]}
+                                  onChange={(e) =>
+                                    setValues((prev) => ({ ...prev, [key]: e.target.value }))
+                                  }
+                                  placeholder={`Enter ${label.toLowerCase()}...`}
+                                  className="bg-background"
+                                />
+                              )}
+                            </div>
+                          ))}
+                          <div className="flex justify-end pt-2">
+                            <Button
+                              onClick={() => handleSaveSection(section.keys.map(k => k.key))}
+                              disabled={savingKey === "section"}
+                            >
+                              <Save className="h-4 w-4 mr-2" />
+                              {savingKey === "section" ? "Saving..." : "Save Section"}
+                            </Button>
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
-
-      {additionalKeys.length > 0 && (
-        <>
-          <Separator />
-          <div>
-            <h2 className="text-lg font-semibold mb-3">Custom Content</h2>
-            <div className="grid gap-4">
-              {additionalKeys.map((key) => (
-                <Card key={key}>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base font-mono text-sm">
-                      {key}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Textarea
-                      rows={3}
-                      value={values[key]}
-                      onChange={(e) =>
-                        setValues((prev) => ({ ...prev, [key]: e.target.value }))
-                      }
-                    />
-                    <div className="flex justify-end">
-                      <Button
-                        size="sm"
-                        onClick={() => handleSave(key)}
-                        disabled={savingKey === key}
-                      >
-                        <Save className="h-4 w-4 mr-2" />
-                        {savingKey === key ? "Saving..." : "Save"}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-
-      <Separator />
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Add Custom Content</CardTitle>
-          <CardDescription>
-            Create a new content entry with a custom key.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="new-key">Key</Label>
-              <Input
-                id="new-key"
-                value={newKey}
-                onChange={(e) => setNewKey(e.target.value)}
-                placeholder="e.g. footer_tagline"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="new-value">Value</Label>
-            <Textarea
-              id="new-value"
-              rows={3}
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-              placeholder="Content value..."
-            />
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={handleAddNew} disabled={addingNew}>
-              <Plus className="h-4 w-4 mr-2" />
-              {addingNew ? "Adding..." : "Add Entry"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import type { ChamberStat, ChamberBelief } from "@/lib/types";
+import { getSiteContent } from "@/lib/content";
+import type { ChamberStat, ChamberBelief, SiteContentMap } from "@/lib/types";
 import ChamberTwoClient from "./chamber-two-client";
 
 const ChamberTwoPage = async () => {
     const supabase = createClient();
+    const content = await getSiteContent();
 
     const [statsRes, beliefsRes] = await Promise.all([
         supabase
@@ -24,7 +26,7 @@ const ChamberTwoPage = async () => {
     const stats = chamberStats.map((s) => ({ count: s.value, text: s.label }));
     const beliefs = chamberBeliefs.map((b) => ({ name: b.title, description: b.content ?? "" }));
 
-    return <ChamberTwoClient stats={stats} beliefs={beliefs} />;
+    return <ChamberTwoClient stats={stats} beliefs={beliefs} content={content} />;
 };
 
 export default ChamberTwoPage;

@@ -117,15 +117,6 @@
   }
 
 
-  body:has(.requires-no-scroll) {
-    overflow: hidden;
-  }
-
-  body:has(.nav-active) main {
-    position: relative;
-    z-index: -10;
-  }
-
   @media not all and (max-width: 768px) {
     .circle {
       height: 110px;
@@ -133,6 +124,15 @@
       background: #000;
       border-radius: 50%;
     }
+  }
+
+  body:has(.requires-no-scroll) {
+    overflow: hidden;
+  }
+
+  body:has(.nav-active) main {
+    position: relative;
+    z-index: -10;
   }
 
   .this {

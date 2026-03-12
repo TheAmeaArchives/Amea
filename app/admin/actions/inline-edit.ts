@@ -4,9 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import { revalidatePath } from "next/cache";
 
-export async function upsertSiteContent(key: string, value: string) {
+export async function updateSiteContent(key: string, value: string) {
   const profile = await getAdminProfile();
-  if (!hasPermission(profile, "site_content")) throw new Error("Unauthorized");
+  if (!profile || !hasPermission(profile, "site_content")) {
+    throw new Error("Unauthorized");
+  }
 
   const supabase = createClient();
 
@@ -19,7 +21,7 @@ export async function upsertSiteContent(key: string, value: string) {
   if (existing) {
     const { error } = await supabase
       .from("site_content")
-      .update({ value })
+      .update({ value, updated_at: new Date().toISOString() })
       .eq("key", key);
     if (error) throw new Error(error.message);
   } else {
@@ -29,6 +31,7 @@ export async function upsertSiteContent(key: string, value: string) {
     if (error) throw new Error(error.message);
   }
 
-  revalidatePath("/admin/site-content");
   revalidatePath("/", "layout");
+  
+  return { success: true };
 }

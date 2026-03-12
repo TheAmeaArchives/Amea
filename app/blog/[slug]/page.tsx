@@ -24,46 +24,47 @@ const BlogPostPage = async ({ params }: { params: { slug: string } }) => {
         <article className="min-h-screen">
             <Link
                 href="/blog"
-                className="inline-flex items-center gap-2 text-default hover:underline mb-8"
+                className="inline-flex items-center gap-2 text-default hover:underline mb-6 sm:mb-8 text-sm sm:text-base"
             >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>Back to Blog</span>
             </Link>
 
-            <header className="mb-12">
-                <p className="text-lg text-gray-500 mb-4">
+            <header className="mb-8 sm:mb-10 md:mb-12">
+                <p className="text-sm sm:text-base md:text-lg text-gray-500 mb-3 sm:mb-4">
                     {new Date(post.created_at).toLocaleDateString("en-US", {
                         month: "long",
                         day: "numeric",
                         year: "numeric",
                     }).toUpperCase()}
                 </p>
-                <h1 className="text-4xl md:text-5xl font-bold editor-font mb-6">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold editor-font mb-4 sm:mb-5 md:mb-6 leading-tight">
                     {post.title}
                 </h1>
                 {post.excerpt && (
-                    <p className="text-xl text-gray-600 aileron font-light max-w-3xl">
+                    <p className="text-base sm:text-lg md:text-xl text-gray-600 aileron font-light max-w-3xl">
                         {post.excerpt}
                     </p>
                 )}
             </header>
 
             {post.cover_image_url && (
-                <div className="mb-12">
+                <div className="mb-8 sm:mb-10 md:mb-12">
                     <img
                         src={post.cover_image_url}
                         alt={post.title}
-                        className="w-full max-w-4xl h-auto max-h-[500px] object-cover rounded-lg"
+                        className="w-full max-w-4xl h-auto max-h-[300px] sm:max-h-[400px] md:max-h-[500px] object-cover rounded-lg"
                     />
                 </div>
             )}
 
-            <div className="prose prose-lg max-w-4xl aileron font-light">
+            <div className="prose prose-sm sm:prose-base md:prose-lg max-w-4xl aileron font-light">
                 {post.content && (
                     typeof post.content === "string" ? (
-                        <p>{post.content}</p>
+                        <p className="text-sm sm:text-base md:text-lg leading-relaxed">{post.content}</p>
                     ) : (
                         <div
+                            className="text-sm sm:text-base md:text-lg leading-relaxed"
                             dangerouslySetInnerHTML={{
                                 __html: JSON.stringify(post.content),
                             }}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ImageUpload from "@/components/admin/image-upload";
@@ -21,7 +20,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function BlogEditForm({ post }: { post: BlogPost }) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [title, setTitle] = useState(post.title);
@@ -59,12 +57,9 @@ export default function BlogEditForm({ post }: { post: BlogPost }) {
 
       await updateBlogPost(post.id, formData);
       
-      if (shouldPublish !== undefined) {
-        setPublished(shouldPublish);
-      }
-      
       toast({ title: shouldPublish ? "Story published!" : "Changes saved" });
-      router.push("/admin/blog");
+      window.location.href = "/admin/blog";
+      return;
     } catch (err: any) {
       toast({
         title: "Failed to save",
@@ -85,7 +80,7 @@ export default function BlogEditForm({ post }: { post: BlogPost }) {
     try {
       await deleteBlogPost(post.id);
       toast({ title: "Post deleted" });
-      router.push("/admin/blog");
+      window.location.href = "/admin/blog";
     } catch (err: any) {
       toast({
         title: "Failed to delete",

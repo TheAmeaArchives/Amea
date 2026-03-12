@@ -4,6 +4,7 @@ import type { BlogPost } from "@/lib/types";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { BlogContentRenderer } from "@/components/blog/blog-content-renderer";
 
 const BlogPostPage = async ({ params }: { params: { slug: string } }) => {
     const supabase = createClient();
@@ -58,19 +59,8 @@ const BlogPostPage = async ({ params }: { params: { slug: string } }) => {
                 </div>
             )}
 
-            <div className="prose prose-sm sm:prose-base md:prose-lg max-w-4xl aileron font-light">
-                {post.content && (
-                    typeof post.content === "string" ? (
-                        <p className="text-sm sm:text-base md:text-lg leading-relaxed">{post.content}</p>
-                    ) : (
-                        <div
-                            className="text-sm sm:text-base md:text-lg leading-relaxed"
-                            dangerouslySetInnerHTML={{
-                                __html: JSON.stringify(post.content),
-                            }}
-                        />
-                    )
-                )}
+            <div className="max-w-4xl aileron font-light">
+                <BlogContentRenderer content={post.content} />
             </div>
         </article>
     );

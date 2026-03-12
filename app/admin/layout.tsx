@@ -19,6 +19,17 @@ export default async function AdminLayout({
     return <>{children}</>;
   }
 
+  const isBlogEditor = pathname.includes("/admin/blog/new") || 
+    (pathname.includes("/admin/blog/") && pathname !== "/admin/blog");
+  
+  if (isBlogEditor) {
+    const profile = await getAdminProfile();
+    if (!profile || !profile.is_active) {
+      redirect("/admin/login");
+    }
+    return <>{children}</>;
+  }
+
   const profile = await getAdminProfile();
 
   if (!profile || !profile.is_active) {

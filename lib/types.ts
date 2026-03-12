@@ -113,6 +113,8 @@ export interface GalleryItem {
   title: string;
   description: string | null;
   image_url: string | null;
+  video_url: string | null;
+  featured: boolean;
   order_index: number;
   created_at: string;
   updated_at: string;

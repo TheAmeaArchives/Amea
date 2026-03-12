@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, Video } from "lucide-react";
 import type { GalleryItem } from "@/lib/types";
 import { toast } from "@/lib/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -19,10 +20,13 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import ImageUpload from "@/components/admin/image-upload";
+import VideoUpload from "@/components/admin/video-upload";
 import {
   createGalleryItem,
   updateGalleryItem,
   deleteGalleryItem,
+  setFeaturedGalleryItem,
+  unsetFeaturedGalleryItem,
 } from "@/app/admin/actions/gallery";
 
 interface GalleryClientProps {
@@ -33,6 +37,7 @@ interface FormState {
   title: string;
   description: string;
   image_url: string | null;
+  video_url: string | null;
   order_index: string;
 }
 
@@ -40,6 +45,7 @@ const defaultForm: FormState = {
   title: "",
   description: "",
   image_url: null,
+  video_url: null,
   order_index: "0",
 };
 
@@ -62,6 +68,7 @@ export default function GalleryClient({ items }: GalleryClientProps) {
       title: item.title,
       description: item.description ?? "",
       image_url: item.image_url,
+      video_url: item.video_url,
       order_index: String(item.order_index),
     });
     setDialogOpen(true);
@@ -79,6 +86,7 @@ export default function GalleryClient({ items }: GalleryClientProps) {
       fd.set("title", form.title);
       fd.set("description", form.description);
       fd.set("image_url", form.image_url ?? "");
+      fd.set("video_url", form.video_url ?? "");
       fd.set("order_index", form.order_index);
 
       if (editing) {
@@ -98,6 +106,25 @@ export default function GalleryClient({ items }: GalleryClientProps) {
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleSetFeatured(item: GalleryItem) {
+    try {
+      if (item.featured) {
+        await unsetFeaturedGalleryItem(item.id);
+        toast({ title: "Removed from featured" });
+      } else {
+        await setFeaturedGalleryItem(item.id);
+        toast({ title: "Set as featured" });
+      }
+      router.refresh();
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     }
   }
 
@@ -140,9 +167,21 @@ export default function GalleryClient({ items }: GalleryClientProps) {
           {items.map((item) => (
             <div
               key={item.id}
-              className="rounded-lg border bg-white overflow-hidden group"
+              className={`rounded-lg border bg-white overflow-hidden group ${item.featured ? "ring-2 ring-yellow-400" : ""}`}
             >
               <div className="relative aspect-[4/3] bg-gray-50">
+                {item.featured && (
+                  <Badge className="absolute top-2 left-2 z-10 bg-yellow-400 text-yellow-900 hover:bg-yellow-400">
+                    <Star className="h-3 w-3 mr-1 fill-current" />
+                    Featured
+                  </Badge>
+                )}
+                {item.video_url && (
+                  <Badge className="absolute top-2 right-2 z-10 bg-blue-500 hover:bg-blue-500">
+                    <Video className="h-3 w-3 mr-1" />
+                    Video
+                  </Badge>
+                )}
                 {item.image_url ? (
                   <Image
                     src={item.image_url}
@@ -168,7 +207,16 @@ export default function GalleryClient({ items }: GalleryClientProps) {
                     {item.description}
                   </p>
                 )}
-                <div className="flex gap-1 pt-1">
+                <div className="flex flex-wrap gap-1 pt-1">
+                  <Button
+                    variant={item.featured ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => handleSetFeatured(item)}
+                    className={item.featured ? "bg-yellow-400 hover:bg-yellow-500 text-yellow-900" : ""}
+                  >
+                    <Star className={`h-3.5 w-3.5 mr-1 ${item.featured ? "fill-current" : ""}`} />
+                    {item.featured ? "Featured" : "Set Featured"}
+                  </Button>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -227,12 +275,23 @@ export default function GalleryClient({ items }: GalleryClientProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label>Image</Label>
+              <Label>Image (Thumbnail)</Label>
               <ImageUpload
                 value={form.image_url}
                 onChange={(url) => setForm({ ...form, image_url: url })}
                 folder="gallery"
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Video (optional)</Label>
+              <VideoUpload
+                value={form.video_url}
+                onChange={(url) => setForm({ ...form, video_url: url })}
+                folder="gallery"
+              />
+              <p className="text-xs text-muted-foreground">
+                Upload a video file (MP4, WebM, MOV) or leave empty to use image only.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="gallery-order">Order Index</Label>

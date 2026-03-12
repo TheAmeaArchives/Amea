@@ -7,12 +7,27 @@ const Gallery = async () => {
   const supabase = createClient();
   const content = await getSiteContent();
   
-  const { data: items } = await supabase
-    .from("gallery_items")
-    .select("*")
-    .order("order_index", { ascending: true });
+  const [{ data: items }, { data: featuredData }] = await Promise.all([
+    supabase
+      .from("gallery_items")
+      .select("*")
+      .order("order_index", { ascending: true }),
+    supabase
+      .from("gallery_items")
+      .select("*")
+      .eq("featured", true)
+      .single(),
+  ]);
 
-  return <GalleryPageClient content={content} items={(items as GalleryItem[]) ?? []} />;
+  const featuredItem = featuredData as GalleryItem | null;
+
+  return (
+    <GalleryPageClient 
+      content={content} 
+      items={(items as GalleryItem[]) ?? []} 
+      featuredItem={featuredItem}
+    />
+  );
 };
 
 export default Gallery;

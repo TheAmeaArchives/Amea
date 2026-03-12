@@ -85,10 +85,17 @@ CREATE TABLE gallery_items (
   title TEXT NOT NULL,
   description TEXT,
   image_url TEXT,
+  video_url TEXT,
+  featured BOOLEAN DEFAULT false,
   order_index INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- Ensure only ONE item can be featured at a time
+CREATE UNIQUE INDEX idx_gallery_items_single_featured 
+ON gallery_items ((true)) 
+WHERE featured = true;
 
 -- Programs
 CREATE TABLE programs (

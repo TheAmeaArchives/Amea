@@ -26,7 +26,7 @@ const ChamberTwoClient = ({ stats: propStats, beliefs: propBeliefs, content }: C
     return (
         <div className="flex flex-col gap-10">
             <div className="flex flex-col gap-2">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold uppercase akira">
+                <h1 className="text-5xl font-bold uppercase akira">
                     <EditableText
                         contentKey="chamber_ii_title"
                         defaultValue={getContentValue('chamber_ii_title', 'Chamber II')}
@@ -34,7 +34,7 @@ const ChamberTwoClient = ({ stats: propStats, beliefs: propBeliefs, content }: C
                         {getContentValue('chamber_ii_title', 'Chamber II')}
                     </EditableText>
                 </h1>
-                <p className="font-light text-base sm:text-lg md:text-xl lg:text-2xl">
+                <p className="font-light text-2xl">
                     <EditableText
                         contentKey="chamber_ii_subtitle"
                         defaultValue={getContentValue('chamber_ii_subtitle', 'A Virtual Research Center.')}

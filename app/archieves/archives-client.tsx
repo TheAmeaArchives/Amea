@@ -18,10 +18,17 @@ export function ArchivesPageClient({ content }: ArchivesPageClientProps) {
             <div className="min-h-[300px] sm:h-80 md:h-96 justify-center gap-4 sm:gap-5 flex flex-col text-start z-50">
                 <h1 className="akira text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold md:mt-16 lg:mt-24 leading-tight">
                     <EditableText
-                        contentKey="archives_title"
-                        defaultValue={getContentValue('archives_title', 'How the pyramids were built ( Kind of )')}
+                        contentKey="archives_title_1"
+                        defaultValue={getContentValue('archives_title_1', 'How the pyramids')}
                     >
-                        {getContentValue('archives_title', 'How the pyramids were built ( Kind of )')}
+                        {getContentValue('archives_title_1', 'How the pyramids')}
+                    </EditableText>
+                    <br />
+                    <EditableText
+                        contentKey="archives_title_2"
+                        defaultValue={getContentValue('archives_title_2', 'were built ( Kind of )')}
+                    >
+                        {getContentValue('archives_title_2', 'were built ( Kind of )')}
                     </EditableText>
                 </h1>
                 <p className="max-w-xl font-light text-sm sm:text-base">

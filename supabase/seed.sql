@@ -44,7 +44,8 @@ INSERT INTO site_content (key, value) VALUES
 -- ARCHIVES PAGE
 -- ============================================
 INSERT INTO site_content (key, value) VALUES
-('archives_title', 'How the pyramids were built ( Kind of )'),
+('archives_title_1', 'How the pyramids'),
+('archives_title_2', 'were built ( Kind of )'),
 ('archives_description', 'We are in 2500 BC, Egypt. About 30,000 of the best craftsmen, sculptors and other skilled workers of the time use their combined talents, knowledge and experience to mold and piece together humble blocks of stones to build up what would be-till today-one of the most majestic structures on Earth: The Great Pyramids.');
 
 -- ============================================

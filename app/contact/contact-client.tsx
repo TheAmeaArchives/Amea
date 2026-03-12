@@ -15,7 +15,7 @@ export function ContactPageClient({ content }: ContactPageClientProps) {
   return (
     <div className="min-h-screen w-full flex flex-row items-start gap-16">
       <div className="flex-[1.5]">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold akira">
+        <h1 className="text-5xl font-bold akira">
           <EditableText
             contentKey="contact_title"
             defaultValue={getContentValue('contact_title', 'CONTACT US')}

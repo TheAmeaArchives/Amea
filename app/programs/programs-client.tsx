@@ -29,7 +29,7 @@ export function ProgramsPageClient({ content, programs }: ProgramsPageClientProp
         <>
             <div className="flex flex-row gap-7 justify-between items-start">
                 <div className="flex-1">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold akira">
+                    <h1 className="text-5xl font-bold akira">
                         <EditableText
                             contentKey="programs_title"
                             defaultValue={getContentValue('programs_title', 'OUR PROGRAMS')}
@@ -37,7 +37,7 @@ export function ProgramsPageClient({ content, programs }: ProgramsPageClientProp
                             {getContentValue('programs_title', 'OUR PROGRAMS')}
                         </EditableText>
                     </h1>
-                    <p className="text-base sm:text-lg md:text-xl lg:text-2xl aileron font-light mt-2">
+                    <p className="text-2xl aileron font-light mt-2">
                         <EditableText
                             contentKey="programs_subtitle"
                             defaultValue={getContentValue('programs_subtitle', 'Insights from curated experiments.')}

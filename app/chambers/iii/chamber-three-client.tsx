@@ -15,7 +15,7 @@ export function ChamberThreeClient({ content, chamberContent }: ChamberThreeClie
     return (
         <div className="space-y-12">
             <div className="flex flex-col gap-2">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold uppercase akira">
+                <h1 className="text-5xl font-bold uppercase akira">
                     <EditableText
                         contentKey="chamber_iii_title"
                         defaultValue={getContentValue('chamber_iii_title', 'Chamber III')}
@@ -23,7 +23,7 @@ export function ChamberThreeClient({ content, chamberContent }: ChamberThreeClie
                         {getContentValue('chamber_iii_title', 'Chamber III')}
                     </EditableText>
                 </h1>
-                <p className="font-light text-base sm:text-lg md:text-xl lg:text-2xl">
+                <p className="font-light text-2xl">
                     <EditableText
                         contentKey="chamber_iii_subtitle"
                         defaultValue={getContentValue('chamber_iii_subtitle', 'Business and Consultance.')}

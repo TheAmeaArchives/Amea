@@ -13,11 +13,11 @@ export function AboutClient({ content }: AboutClientProps) {
   const getContentValue = (key: string, fallback: string) => content[key] ?? fallback;
 
   return (
-    <div className="min-h-screen flex flex-col gap-24 sm:gap-40 md:gap-60 lg:gap-80">
+    <div className="min-h-screen flex flex-col gap-80">
       <div>
         <div className="flex max-lg:flex-col lg:items-center gap-y-10 lg:justify-around">
-          <div className="editor-font font-medium leading-[.9] max-lg:leading-[.8] text-[48px] sm:text-[60px] md:text-[80px] lg:text-[120px] xl:text-[148px]">
-            <h1 className="text">
+          <div className="editor-font font-medium leading-[.9] max-lg:leading-[.8] text-[148px]">
+            <h1 className="text max-lg:text-[68px]">
               <EditableText
                 contentKey="home_about_heading_1"
                 defaultValue={getContentValue('home_about_heading_1', 'AI.')}
@@ -25,7 +25,7 @@ export function AboutClient({ content }: AboutClientProps) {
                 {getContentValue('home_about_heading_1', 'AI.')}
               </EditableText>
             </h1>
-            <h1 className="text">
+            <h1 className="text max-lg:text-[68px]">
               <EditableText
                 contentKey="home_about_heading_2"
                 defaultValue={getContentValue('home_about_heading_2', 'Penicillin.')}
@@ -33,7 +33,7 @@ export function AboutClient({ content }: AboutClientProps) {
                 {getContentValue('home_about_heading_2', 'Penicillin.')}
               </EditableText>
             </h1>
-            <h1 className="text">
+            <h1 className="text max-lg:text-[68px]">
               <EditableText
                 contentKey="home_about_heading_3"
                 defaultValue={getContentValue('home_about_heading_3', 'Fire.')}
@@ -42,7 +42,7 @@ export function AboutClient({ content }: AboutClientProps) {
               </EditableText>
             </h1>
           </div>
-          <div className="flex flex-col gap-8 text-base sm:text-lg lg:text-xl font-light aileron max-w-[550px]">
+          <div className="flex flex-col gap-8 text-xl font-light aileron max-w-[550px]">
             <p>
               <EditableText
                 contentKey="home_about_text_1"
@@ -76,7 +76,7 @@ export function AboutClient({ content }: AboutClientProps) {
       <div>
         <div className="flex max-lg:flex-col lg:justify-around lg:items-center gap-10">
           <div className="lg:hidden editor-font">
-            <h1 className="font-medium text text-[40px] sm:text-[50px] md:text-[60px] relative flex flex-col leading-[.9]">
+            <h1 className="font-medium text text-[68px] relative flex flex-col leading-[.9]">
               <span>
                 <EditableText
                   contentKey="home_innovation_heading_1"
@@ -104,7 +104,7 @@ export function AboutClient({ content }: AboutClientProps) {
               <p className="text-default absolute text-7xl w-full h-full -top-6 left-0 center">&</p>
             </h1>
           </div>
-          <div className="flex flex-col gap-8 text-base sm:text-lg lg:text-xl w-full max-w-[520px] aileron font-light">
+          <div className="flex flex-col gap-8 text-xl w-full max-w-[520px] aileron font-light">
             <EditableText
               contentKey="home_innovation_text"
               defaultValue={getContentValue('home_innovation_text', 'Now this begs the question "How?" Our approach to moving forward that mission is threefold.')}
@@ -114,7 +114,7 @@ export function AboutClient({ content }: AboutClientProps) {
             </EditableText>
           </div>
           <div className="max-lg:hidden editor-font">
-            <h1 className="font-medium text text-[100px] xl:text-[148px] relative flex flex-col gap-5 leading-[.8]">
+            <h1 className="font-medium text text-[148px] relative flex flex-col gap-5 leading-[.8]">
               <span>
                 <EditableText
                   contentKey="home_innovation_heading_1"
@@ -148,7 +148,7 @@ export function AboutClient({ content }: AboutClientProps) {
       </div>
       <div className="gap-10 center flex-col editor-font">
         <Image src="/big.svg" alt="Amea big logo" width={250} height={250} className="w-[250px] h-[250px]" />
-        <p className="text-center text-xl sm:text-2xl lg:text-3xl">
+        <p className="text-center text-3xl">
           <span className="relative after:absolute after:bg-default after:w-full after:h-1/3 after:left-0 after:bottom-[3px] after:-z-10">
             <EditableText
               contentKey="home_tagline"

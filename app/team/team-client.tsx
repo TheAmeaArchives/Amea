@@ -25,7 +25,7 @@ export function TeamPageClient({ content, collaborators, contributors, supporter
             </section>
             <div className="flex flex-col gap-16">
                 <div className="flex flex-col gap-10">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold akira">
+                    <h1 className="text-5xl font-bold akira">
                         <EditableText
                             contentKey="team_page_title"
                             defaultValue={getContentValue('team_page_title', 'OUR TEAM')}
@@ -33,7 +33,7 @@ export function TeamPageClient({ content, collaborators, contributors, supporter
                             {getContentValue('team_page_title', 'OUR TEAM')}
                         </EditableText>
                     </h1>
-                    <p className="text-base sm:text-lg md:text-xl font-light max-w-4xl">
+                    <p className="text-xl font-light max-w-4xl">
                         <EditableText
                             contentKey="team_page_description"
                             defaultValue={getContentValue('team_page_description', 'We are in 2500 BC, Egypt...')}
@@ -45,7 +45,7 @@ export function TeamPageClient({ content, collaborators, contributors, supporter
                 </div>
                 <div className="flex flex-col gap-16">
                     <div className="flex flex-col gap-10">
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold akira">
+                        <h1 className="text-5xl font-bold akira">
                             <EditableText
                                 contentKey="team_collaborators_title"
                                 defaultValue={getContentValue('team_collaborators_title', 'OUR COLLABORATORS')}
@@ -53,7 +53,7 @@ export function TeamPageClient({ content, collaborators, contributors, supporter
                                 {getContentValue('team_collaborators_title', 'OUR COLLABORATORS')}
                             </EditableText>
                         </h1>
-                        <p className="text-base sm:text-lg md:text-xl font-light max-w-4xl">
+                        <p className="text-xl font-light max-w-4xl">
                             <EditableText
                                 contentKey="team_collaborators_description"
                                 defaultValue={getContentValue('team_collaborators_description', 'We are in 2500 BC, Egypt...')}
@@ -92,7 +92,7 @@ export function TeamPageClient({ content, collaborators, contributors, supporter
                 </div>
                 <div className="flex flex-col gap-16">
                     <div className="flex flex-col gap-10">
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold akira">
+                        <h1 className="text-5xl font-bold akira">
                             <EditableText
                                 contentKey="team_contributors_title"
                                 defaultValue={getContentValue('team_contributors_title', 'OUR CONTRIBUTORS')}
@@ -100,7 +100,7 @@ export function TeamPageClient({ content, collaborators, contributors, supporter
                                 {getContentValue('team_contributors_title', 'OUR CONTRIBUTORS')}
                             </EditableText>
                         </h1>
-                        <p className="text-base sm:text-lg md:text-xl font-light max-w-4xl">
+                        <p className="text-xl font-light max-w-4xl">
                             <EditableText
                                 contentKey="team_contributors_description"
                                 defaultValue={getContentValue('team_contributors_description', 'We are in 2500 BC, Egypt...')}
@@ -141,7 +141,7 @@ export function TeamPageClient({ content, collaborators, contributors, supporter
                 </div>
                 <div className="flex flex-col gap-16">
                     <div className="flex flex-col gap-10">
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold akira">
+                        <h1 className="text-5xl font-bold akira">
                             <EditableText
                                 contentKey="team_supporters_title"
                                 defaultValue={getContentValue('team_supporters_title', 'OUR SUPPORTERS')}
@@ -149,7 +149,7 @@ export function TeamPageClient({ content, collaborators, contributors, supporter
                                 {getContentValue('team_supporters_title', 'OUR SUPPORTERS')}
                             </EditableText>
                         </h1>
-                        <p className="text-base sm:text-lg md:text-xl font-light max-w-4xl">
+                        <p className="text-xl font-light max-w-4xl">
                             <EditableText
                                 contentKey="team_supporters_description"
                                 defaultValue={getContentValue('team_supporters_description', 'We are in 2500 BC, Egypt...')}
@@ -178,7 +178,7 @@ export function TeamPageClient({ content, collaborators, contributors, supporter
                     </div>
                 </div>
                 <div className="flex flex-col gap-10">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold akira">
+                    <h1 className="text-5xl font-bold akira">
                         <EditableText
                             contentKey="team_be_part_title"
                             defaultValue={getContentValue('team_be_part_title', 'BE PART')}
@@ -186,7 +186,7 @@ export function TeamPageClient({ content, collaborators, contributors, supporter
                             {getContentValue('team_be_part_title', 'BE PART')}
                         </EditableText>
                     </h1>
-                    <p className="text-base sm:text-lg md:text-xl font-light max-w-4xl italic">
+                    <p className="text-xl font-light max-w-4xl italic">
                         <EditableText
                             contentKey="team_be_part_text"
                             defaultValue={getContentValue('team_be_part_text', 'You too can pose your block on this edifice. Just click')}

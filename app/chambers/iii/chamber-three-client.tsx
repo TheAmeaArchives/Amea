@@ -3,6 +3,7 @@
 import React from "react";
 import type { ChamberContent, SiteContentMap } from "@/lib/types";
 import { EditableText } from "@/components/admin/editable-text";
+import { VolunteerButton } from "@/components/volunteer-form";
 
 interface ChamberThreeClientProps {
     content: SiteContentMap;
@@ -45,6 +46,14 @@ export function ChamberThreeClient({ content, chamberContent }: ChamberThreeClie
                     </p>
                 )}
             </section>
+
+            {/* Volunteer CTA Section */}
+            <div className="flex flex-col items-center gap-6 sm:gap-8 mt-16 sm:mt-20 py-12 sm:py-16 border-t border-gray-200">
+                <p className="text-lg sm:text-xl text-gray-600 text-center aileron font-light max-w-xl">
+                    Want to collaborate with us on business solutions? Reach out as a volunteer.
+                </p>
+                <VolunteerButton label="Volunteer to collaborate" />
+            </div>
         </div>
     );
 }

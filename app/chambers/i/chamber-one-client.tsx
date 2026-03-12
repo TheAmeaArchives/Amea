@@ -6,6 +6,7 @@ import React from "react";
 import { Bookmark } from "lucide-react";
 import type { Experiment, SiteContentMap } from "@/lib/types";
 import { EditableText } from "@/components/admin/editable-text";
+import { VolunteerButton } from "@/components/volunteer-form";
 
 interface ChamberOneClientProps {
     content: SiteContentMap;
@@ -81,6 +82,14 @@ export function ChamberOneClient({ content, experiments }: ChamberOneClientProps
                     <p className="text-sm text-gray-400 mt-2">Check back soon for new insights.</p>
                 </div>
             )}
+
+            {/* Volunteer CTA Section */}
+            <div className="flex flex-col items-center gap-6 sm:gap-8 mt-16 sm:mt-20 md:mt-24 py-12 sm:py-16 border-t border-gray-200">
+                <p className="text-lg sm:text-xl text-gray-600 text-center aileron font-light max-w-xl">
+                    Interested in contributing to our research? Join us as a volunteer.
+                </p>
+                <VolunteerButton label="Volunteer to participate" />
+            </div>
         </div>
     );
 }

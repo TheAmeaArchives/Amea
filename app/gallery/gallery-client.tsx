@@ -15,7 +15,7 @@ export function GalleryPageClient({ content, items }: GalleryPageClientProps) {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="akira text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
+      <div className="akira text-5xl">
         <h1>
           <EditableText
             contentKey="gallery_title_1"
@@ -37,7 +37,7 @@ export function GalleryPageClient({ content, items }: GalleryPageClientProps) {
         {/* Featured gallery image placeholder */}
       </div>
       <div className="py-24 center">
-        <h1 className="text-lg sm:text-xl md:text-2xl lg:text-[32px] font-normal text-center leading-relaxed">
+        <h1 className="text-[32px] font-normal text-center leading-relaxed">
           <EditableText
             contentKey="gallery_description"
             defaultValue={getContentValue('gallery_description', 'Display of projects built & impact created using our insights.')}
@@ -61,7 +61,7 @@ export function GalleryPageClient({ content, items }: GalleryPageClientProps) {
                   <div className="bg-default w-full h-56 rounded-lg" />
                 )}
                 <div>
-                  <h1 className="text-base sm:text-lg md:text-xl font-medium">{item.title}</h1>
+                  <h1 className="text-xl font-medium">{item.title}</h1>
                   <p className="text-sm text-black/70">{item.description ?? ""}</p>
                 </div>
               </div>

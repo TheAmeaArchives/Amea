@@ -19,7 +19,7 @@ export function ChamberOneClient({ content, experiments }: ChamberOneClientProps
     return (
         <div className="flex flex-col gap-20">
             <div className="flex flex-col gap-2">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold uppercase akira">
+                <h1 className="text-5xl font-bold uppercase akira">
                     <EditableText
                         contentKey="chamber_i_title"
                         defaultValue={getContentValue('chamber_i_title', 'Chamber I')}
@@ -27,7 +27,7 @@ export function ChamberOneClient({ content, experiments }: ChamberOneClientProps
                         {getContentValue('chamber_i_title', 'Chamber I')}
                     </EditableText>
                 </h1>
-                <p className="font-light text-base sm:text-lg md:text-xl lg:text-2xl">
+                <p className="font-light text-2xl">
                     <EditableText
                         contentKey="chamber_i_subtitle"
                         defaultValue={getContentValue('chamber_i_subtitle', 'Insights from curated experiments.')}

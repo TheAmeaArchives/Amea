@@ -20,7 +20,7 @@ export function BlogPageClient({ content, posts }: BlogPageClientProps) {
         <div className="min-h-screen">
             <div className="flex gap-10 flex-wrap justify-between items-start">
                 <div className="flex flex-col gap-3">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold akira">
+                    <h1 className="text-5xl font-bold akira">
                         <EditableText
                             contentKey="blog_title"
                             defaultValue={getContentValue('blog_title', 'OUR BLOG')}
@@ -28,7 +28,7 @@ export function BlogPageClient({ content, posts }: BlogPageClientProps) {
                             {getContentValue('blog_title', 'OUR BLOG')}
                         </EditableText>
                     </h1>
-                    <p className="text-base sm:text-lg md:text-xl lg:text-2xl aileron font-light">
+                    <p className="text-2xl aileron font-light">
                         <EditableText
                             contentKey="blog_subtitle"
                             defaultValue={getContentValue('blog_subtitle', 'A virtual research center')}
@@ -60,14 +60,14 @@ export function BlogPageClient({ content, posts }: BlogPageClientProps) {
                             <div className="flex flex-col justify-between flex-1 gap-4">
                                 <div className="flex justify-between gap-2">
                                     <div className="py-1 sm:py-2 md:py-3">
-                                        <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-normal text-gray-600">
+                                        <p className="text-2xl font-normal text-gray-600">
                                             {new Date(post.created_at).toLocaleDateString("en-US", {
                                                 month: "long",
                                                 day: "numeric",
                                                 year: "numeric",
                                             }).toUpperCase()}
                                         </p>
-                                        <h1 className="text-lg sm:text-xl md:text-2xl lg:text-[40px] leading-tight font-bold max-w-xl -z-10 editor-font mt-1">
+                                        <h1 className="text-[40px] leading-tight font-bold max-w-xl -z-10 editor-font mt-1">
                                             {post.title}
                                         </h1>
                                     </div>
@@ -77,7 +77,7 @@ export function BlogPageClient({ content, posts }: BlogPageClientProps) {
                                     href={`/blog/${post.slug}`}
                                     className="flex items-center gap-3 group"
                                 >
-                                    <span className="text-base sm:text-lg md:text-xl lg:text-2xl group-hover:text-default transition-colors">READ MORE</span>
+                                    <span className="text-2xl group-hover:text-default transition-colors">READ MORE</span>
                                     <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
                                 </Link>
                             </div>
@@ -91,7 +91,7 @@ export function BlogPageClient({ content, posts }: BlogPageClientProps) {
                 )}
             </div>
             <div className="flex py-20 flex-col gap-5">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold max-w-xl -z-10 editor-font">
+                <h1 className="text-3xl font-bold max-w-xl -z-10 editor-font">
                     <EditableText
                         contentKey="blog_newsletter_title"
                         defaultValue={getContentValue('blog_newsletter_title', 'Join over 100,000 Subscribers to Our Newsletter')}
@@ -115,7 +115,7 @@ export function BlogPageClient({ content, posts }: BlogPageClientProps) {
                     className="flex-1 outline-none border sm:border-none rounded-full sm:rounded-none px-4 sm:px-5 py-3 sm:py-0 placeholder:aileron placeholder:font-light placeholder:text-gray-400"
                     placeholder="Enter your email"
                 />
-                <button className="py-[5px] bg-default text-white text-base sm:text-lg md:text-xl px-10 outline-none aileron uppercase hover:bg-default/90 transition-colors">
+                <button className="py-[5px] bg-default text-white text-xl px-10 outline-none aileron uppercase hover:bg-default/90 transition-colors">
                     Sign up
                 </button>
             </form>

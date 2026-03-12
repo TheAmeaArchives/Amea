@@ -18,7 +18,7 @@ export function ContributorsPageClient({ content, contributors }: ContributorsPa
         <>
             <div className="flex flex-col gap-10">
                 <div className="w-full gap-4 flex flex-col">
-                    <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold akira w-fit">
+                    <h1 className="text-5xl font-bold akira w-fit">
                         <EditableText
                             contentKey="contributors_title"
                             defaultValue={getContentValue('contributors_title', 'OUR CONTRIBUTORS')}
@@ -26,7 +26,7 @@ export function ContributorsPageClient({ content, contributors }: ContributorsPa
                             {getContentValue('contributors_title', 'OUR CONTRIBUTORS')}
                         </EditableText>
                     </h1>
-                    <p className="text-base sm:text-lg md:text-xl font-light max-w-4xl">
+                    <p className="text-xl font-light max-w-4xl">
                         <EditableText
                             contentKey="contributors_description"
                             defaultValue={getContentValue('contributors_description', 'We are in 2500 BC, Egypt...')}

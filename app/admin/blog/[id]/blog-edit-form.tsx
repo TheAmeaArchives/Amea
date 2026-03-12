@@ -9,9 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import ImageUpload from "@/components/admin/image-upload";
 import { updateBlogPost } from "@/app/admin/actions/blog";
 import { toast } from "@/lib/use-toast";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Eye } from "lucide-react";
 import Link from "next/link";
 import type { BlogPost } from "@/lib/types";
+import { BlogPreview } from "@/components/admin/blog-preview";
 
 export default function BlogEditForm({ post }: { post: BlogPost }) {
   const router = useRouter();
@@ -26,6 +27,7 @@ export default function BlogEditForm({ post }: { post: BlogPost }) {
     post.cover_image_url
   );
   const [published, setPublished] = useState(post.published);
+  const [showPreview, setShowPreview] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -128,17 +130,28 @@ export default function BlogEditForm({ post }: { post: BlogPost }) {
           />
         </div>
 
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id="published"
-            checked={published}
-            onChange={(e) => setPublished(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 accent-[#e9190f]"
-          />
-          <Label htmlFor="published" className="cursor-pointer">
-            Published
-          </Label>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="published"
+              checked={published}
+              onChange={(e) => setPublished(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 accent-[#e9190f]"
+            />
+            <Label htmlFor="published" className="cursor-pointer">
+              Published
+            </Label>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowPreview(true)}
+            className="flex items-center gap-2"
+          >
+            <Eye size={16} />
+            Preview
+          </Button>
         </div>
 
         <div className="flex gap-3 pt-4">
@@ -157,6 +170,16 @@ export default function BlogEditForm({ post }: { post: BlogPost }) {
           </Link>
         </div>
       </form>
+
+      <BlogPreview
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        title={title}
+        excerpt={excerpt}
+        content={content}
+        coverImage={coverImage}
+        createdAt={post.created_at}
+      />
     </div>
   );
 }

@@ -230,6 +230,8 @@ export const SITE_CONTENT_SECTIONS: ContentSection[] = [
     label: 'Team Sections',
     description: 'Section titles and descriptions',
     keys: [
+      { key: 'team_members_title', label: 'Team Members Title', type: 'text' },
+      { key: 'team_members_description', label: 'Team Members Description', type: 'textarea' },
       { key: 'team_collaborators_title', label: 'Collaborators Title', type: 'text' },
       { key: 'team_collaborators_description', label: 'Collaborators Description', type: 'textarea' },
       { key: 'team_contributors_title', label: 'Contributors Title', type: 'text' },

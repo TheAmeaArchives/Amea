@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React from "react";
-import { ArrowRight, EllipsisVertical } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Search from "@/components/chambers/search";
 import type { BlogPost, SiteContentMap } from "@/lib/types";
 import { EditableText } from "@/components/admin/editable-text";
@@ -41,44 +41,41 @@ export function BlogPageClient({ content, posts }: BlogPageClientProps) {
                     <Search mode="ICON" />
                 </span>
             </div>
-            <div className="flex flex-col gap-20 mt-20">
+            <div className="flex flex-col mt-16 sm:mt-20">
                 {hasPosts ? (
                     posts.map((post) => (
                         <div
                             key={post.id}
-                            className="-z-10 relative after:absolute after:h-1 sm:after:h-2 w-full flex flex-col md:flex-row after:-bottom-6 sm:after:-bottom-8 md:after:-bottom-10 gap-4 sm:gap-5 after:w-full after:left-0 after:bg-black/10 after:-z-10"
+                            className="flex flex-col md:flex-row gap-5 sm:gap-6 md:gap-8 py-8 sm:py-10 border-b border-gray-200 first:pt-0"
                         >
                             {post.cover_image_url ? (
                                 <img
                                     src={post.cover_image_url}
                                     alt={post.title}
-                                    className="h-48 sm:h-56 md:h-60 w-full md:max-w-80 lg:max-w-96 object-cover rounded-sm"
+                                    className="h-32 w-32 sm:h-36 sm:w-36 md:h-40 md:w-40 object-cover flex-shrink-0"
                                 />
                             ) : (
-                                <div className="bg-default h-48 sm:h-56 md:h-60 w-full md:max-w-80 lg:max-w-96 rounded-sm" />
+                                <div className="bg-default h-32 w-32 sm:h-36 sm:w-36 md:h-40 md:w-40 flex-shrink-0" />
                             )}
-                            <div className="flex flex-col justify-between flex-1 gap-4">
-                                <div className="flex justify-between gap-2">
-                                    <div className="py-1 sm:py-2 md:py-3">
-                                        <p className="text-2xl font-normal text-gray-600">
-                                            {new Date(post.created_at).toLocaleDateString("en-US", {
-                                                month: "long",
-                                                day: "numeric",
-                                                year: "numeric",
-                                            }).toUpperCase()}
-                                        </p>
-                                        <h1 className="text-[40px] leading-tight font-bold max-w-xl -z-10 editor-font mt-1">
-                                            {post.title}
-                                        </h1>
-                                    </div>
-                                    <EllipsisVertical className="cursor-pointer w-5 h-5 flex-shrink-0" />
+                            <div className="flex flex-col justify-between flex-1 gap-3 sm:gap-4">
+                                <div>
+                                    <p className="text-sm sm:text-base font-medium text-gray-500 tracking-wide">
+                                        {new Date(post.created_at).toLocaleDateString("en-US", {
+                                            month: "long",
+                                            day: "numeric",
+                                            year: "numeric",
+                                        }).toUpperCase()}
+                                    </p>
+                                    <h2 className="text-xl sm:text-2xl md:text-3xl font-bold editor-font mt-2 leading-tight">
+                                        {post.title}
+                                    </h2>
                                 </div>
                                 <Link
                                     href={`/blog/${post.slug}`}
-                                    className="flex items-center gap-3 group"
+                                    className="flex items-center gap-2 group w-fit"
                                 >
-                                    <span className="text-2xl group-hover:text-default transition-colors">READ MORE</span>
-                                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
+                                    <span className="text-sm sm:text-base font-medium tracking-wide group-hover:text-default transition-colors">READ MORE</span>
+                                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 group-hover:text-default transition-all" />
                                 </Link>
                             </div>
                         </div>

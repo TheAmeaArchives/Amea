@@ -8,7 +8,12 @@ const Teams = async () => {
     const supabase = createClient();
     const content = await getSiteContent();
 
-    const [collaboratorsRes, contributorsRes, supportersRes] = await Promise.all([
+    const [teamMembersRes, collaboratorsRes, contributorsRes, supportersRes] = await Promise.all([
+        supabase
+            .from("team_members")
+            .select("*")
+            .eq("member_type", "team")
+            .order("order_index"),
         supabase
             .from("team_members")
             .select("*")
@@ -25,6 +30,7 @@ const Teams = async () => {
             .order("order_index"),
     ]);
 
+    const teamMembers = (teamMembersRes.data as TeamMember[] | null) ?? [];
     const collaborators = (collaboratorsRes.data as TeamMember[] | null) ?? [];
     const contributors = (contributorsRes.data as Contributor[] | null) ?? [];
     const dbSupporters = (supportersRes.data as Supporter[] | null) ?? [];
@@ -37,6 +43,7 @@ const Teams = async () => {
     return (
         <TeamPageClient 
             content={content}
+            teamMembers={teamMembers}
             collaborators={collaborators}
             contributors={contributors}
             supportersList={supportersList}

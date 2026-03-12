@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ImageUpload from "@/components/admin/image-upload";
@@ -29,7 +28,6 @@ function slugify(text: string) {
 }
 
 export default function NewBlogPostPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
@@ -75,7 +73,8 @@ export default function NewBlogPostPage() {
 
       await createBlogPost(formData);
       toast({ title: shouldPublish ? "Story published!" : "Draft saved" });
-      router.push("/admin/blog");
+      window.location.href = "/admin/blog";
+      return;
     } catch (err: any) {
       toast({
         title: "Failed to save",
@@ -145,7 +144,7 @@ export default function NewBlogPostPage() {
                     {showSettings ? "Hide settings" : "Show settings"}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => router.push("/admin/blog")}>
+                  <DropdownMenuItem onClick={() => { window.location.href = "/admin/blog"; }}>
                     Discard draft
                   </DropdownMenuItem>
                 </DropdownMenuContent>

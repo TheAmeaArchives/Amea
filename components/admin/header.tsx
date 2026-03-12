@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, ExternalLink } from "lucide-react";
+import { LogOut, Globe } from "lucide-react";
 import type { AdminProfile } from "@/lib/types";
 import { logout } from "@/app/admin/actions/auth";
 
@@ -35,14 +34,13 @@ export default function AdminHeader({ profile }: { profile: AdminProfile }) {
       </h2>
 
       <div className="flex items-center gap-4">
-        <Link
+        <a
           href="/"
-          target="_blank"
           className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
         >
-          <ExternalLink className="w-4 h-4" />
+          <Globe className="w-4 h-4" />
           <span className="hidden sm:inline">View Site</span>
-        </Link>
+        </a>
 
         <Badge
           variant={profile.role === "super_admin" ? "default" : "secondary"}

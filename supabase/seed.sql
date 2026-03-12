@@ -31,6 +31,8 @@ INSERT INTO site_content (key, value) VALUES
 ('team_hero_text_1', 'Different shades'),
 ('team_hero_text_2', 'of'),
 ('team_hero_highlight', 'Red'),
+('team_members_title', 'OUR TEAM MEMBERS'),
+('team_members_description', 'Meet the dedicated individuals who drive our mission forward.'),
 ('team_collaborators_title', 'OUR COLLABORATORS'),
 ('team_collaborators_description', 'We are in 2500 BC, Egypt. About 30,000 of the best craftsmen, sculptors and other skilled workers of the time use their combined talents.'),
 ('team_contributors_title', 'OUR CONTRIBUTORS'),

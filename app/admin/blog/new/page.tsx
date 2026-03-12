@@ -9,8 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import ImageUpload from "@/components/admin/image-upload";
 import { createBlogPost } from "@/app/admin/actions/blog";
 import { toast } from "@/lib/use-toast";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Eye } from "lucide-react";
 import Link from "next/link";
+import { BlogPreview } from "@/components/admin/blog-preview";
 
 function slugify(text: string) {
   return text
@@ -30,6 +31,7 @@ export default function NewBlogPostPage() {
   const [content, setContent] = useState("");
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [published, setPublished] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   function handleTitleChange(value: string) {
     setTitle(value);
@@ -137,17 +139,28 @@ export default function NewBlogPostPage() {
           />
         </div>
 
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id="published"
-            checked={published}
-            onChange={(e) => setPublished(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 accent-[#e9190f]"
-          />
-          <Label htmlFor="published" className="cursor-pointer">
-            Publish immediately
-          </Label>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="published"
+              checked={published}
+              onChange={(e) => setPublished(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 accent-[#e9190f]"
+            />
+            <Label htmlFor="published" className="cursor-pointer">
+              Publish immediately
+            </Label>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setShowPreview(true)}
+            className="flex items-center gap-2"
+          >
+            <Eye size={16} />
+            Preview
+          </Button>
         </div>
 
         <div className="flex gap-3 pt-4">
@@ -166,6 +179,15 @@ export default function NewBlogPostPage() {
           </Link>
         </div>
       </form>
+
+      <BlogPreview
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        title={title}
+        excerpt={excerpt}
+        content={content}
+        coverImage={coverImage}
+      />
     </div>
   );
 }

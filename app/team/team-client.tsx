@@ -10,12 +10,13 @@ import { EditableText } from "@/components/admin/editable-text";
 
 interface TeamPageClientProps {
     content: SiteContentMap;
+    teamMembers: TeamMember[];
     collaborators: TeamMember[];
     contributors: Contributor[];
     supportersList: { name: string; path: string; href: string }[];
 }
 
-export function TeamPageClient({ content, collaborators, contributors, supportersList }: TeamPageClientProps) {
+export function TeamPageClient({ content, teamMembers, collaborators, contributors, supportersList }: TeamPageClientProps) {
     const getContentValue = (key: string, fallback: string) => content[key] ?? fallback;
 
     return (
@@ -43,6 +44,64 @@ export function TeamPageClient({ content, collaborators, contributors, supporter
                         </EditableText>
                     </p>
                 </div>
+                {/* Team Members Section */}
+                <div className="flex flex-col gap-16">
+                    <div className="flex flex-col gap-10">
+                        <h1 className="text-5xl font-bold akira">
+                            <EditableText
+                                contentKey="team_members_title"
+                                defaultValue={getContentValue('team_members_title', 'OUR TEAM MEMBERS')}
+                            >
+                                {getContentValue('team_members_title', 'OUR TEAM MEMBERS')}
+                            </EditableText>
+                        </h1>
+                        <p className="text-xl font-light max-w-4xl">
+                            <EditableText
+                                contentKey="team_members_description"
+                                defaultValue={getContentValue('team_members_description', 'Meet the dedicated individuals who drive our mission forward.')}
+                                multiline
+                            >
+                                {getContentValue('team_members_description', 'Meet the dedicated individuals who drive our mission forward.')}
+                            </EditableText>
+                        </p>
+                    </div>
+                    <div className="max-w-4xl w-full flex flex-col gap-6 sm:gap-8">
+                        {teamMembers.length > 0 ? (
+                            teamMembers.map((member) => (
+                                <div key={member.id} className="flex items-start gap-4 sm:gap-6 border-b border-gray-100 pb-6 sm:pb-8 last:border-b-0">
+                                    <div className="relative h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 flex-shrink-0">
+                                        <Image
+                                            src={member.image_url ?? "/girl.svg"}
+                                            alt={member.name}
+                                            className="object-cover rounded-full"
+                                            fill
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                        <h3 className="font-semibold text-lg sm:text-xl md:text-2xl text-gray-900">
+                                            {member.name}
+                                        </h3>
+                                        {member.role && (
+                                            <p className="text-sm sm:text-base text-gray-500">
+                                                {member.role}
+                                            </p>
+                                        )}
+                                        {member.bio && (
+                                            <p className="text-sm sm:text-base text-gray-600 mt-1 line-clamp-2">
+                                                {member.bio}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-16 text-center">
+                                <p className="text-lg text-gray-500 aileron">No team members listed yet.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                {/* Collaborators Section */}
                 <div className="flex flex-col gap-16">
                     <div className="flex flex-col gap-10">
                         <h1 className="text-5xl font-bold akira">

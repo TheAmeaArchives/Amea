@@ -11,7 +11,7 @@ import { matchesAny } from "@/constants/functions";
 import { Toaster } from "@/components/ui/toaster";
 import { EditModeProvider } from "@/components/admin/edit-mode-context";
 import { EditModeToggle } from "@/components/admin/edit-mode-toggle";
-import { checkIsAdmin } from "@/lib/check-admin";
+import { checkAdminPermissions } from "@/lib/check-admin";
 
 export const metadata: Metadata = {
     title: "The Amea Archives",
@@ -76,7 +76,9 @@ export default async function RootLayout({
     const isAdminRoute = pathname?.startsWith('/admin');
     const pathHasBackButton = !isAdminRoute && matchesAny(pathname as string, pathsHavingBackButton);
     
-    const isUserAdmin = !isAdminRoute ? await checkIsAdmin() : false;
+    const { canEditSiteContent } = !isAdminRoute 
+        ? await checkAdminPermissions() 
+        : { canEditSiteContent: false };
 
     return (
         <html
@@ -94,7 +96,7 @@ export default async function RootLayout({
                         <Toaster />
                     </>
                 ) : (
-                    <EditModeProvider isAdmin={isUserAdmin}>
+                    <EditModeProvider canEditSiteContent={canEditSiteContent}>
                         <Navbar />
                         <main className={cn("w-full min-h-screen px-[105px] max-sm:px-8", {
                             "py-40 pt-48 md:pt-80": !pathHasBackButton,

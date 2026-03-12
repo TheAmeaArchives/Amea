@@ -245,7 +245,8 @@ export const SITE_CONTENT_SECTIONS: ContentSection[] = [
     label: 'Archives Page',
     description: 'The archives/chambers overview page',
     keys: [
-      { key: 'archives_title', label: 'Page Title', type: 'text' },
+      { key: 'archives_title_1', label: 'Page Title Line 1', type: 'text' },
+      { key: 'archives_title_2', label: 'Page Title Line 2', type: 'text' },
       { key: 'archives_description', label: 'Page Description', type: 'textarea' },
     ]
   },

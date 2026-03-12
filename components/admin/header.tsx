@@ -1,7 +1,6 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,17 +11,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User } from "lucide-react";
+import { LogOut, ExternalLink } from "lucide-react";
 import type { AdminProfile } from "@/lib/types";
+import { logout } from "@/app/admin/actions/auth";
 
 export default function AdminHeader({ profile }: { profile: AdminProfile }) {
-  const router = useRouter();
-  const supabase = createClient();
-
   async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push("/admin/login");
-    router.refresh();
+    await logout();
   }
 
   const initials = profile.full_name
@@ -40,6 +35,15 @@ export default function AdminHeader({ profile }: { profile: AdminProfile }) {
       </h2>
 
       <div className="flex items-center gap-4">
+        <Link
+          href="/"
+          target="_blank"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+        >
+          <ExternalLink className="w-4 h-4" />
+          <span className="hidden sm:inline">View Site</span>
+        </Link>
+
         <Badge
           variant={profile.role === "super_admin" ? "default" : "secondary"}
           className="hidden sm:inline-flex"

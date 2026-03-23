@@ -94,6 +94,13 @@ export function hasPermission(profile: AdminProfileRecord, permission: AdminPerm
   return profile.permissions.includes(permission);
 }
 
+export function hasAnyPermission(
+  profile: AdminProfileRecord,
+  permissions: readonly AdminPermission[],
+): boolean {
+  return permissions.some((permission) => hasPermission(profile, permission));
+}
+
 export async function requireSession(
   req: Request,
   res: ExpressResponse,
@@ -181,6 +188,25 @@ export function requireAdminPermission(permission: AdminPermission) {
     }
 
     if (!hasPermission(profile, permission)) {
+      sendError(res, 403, "FORBIDDEN", "You are not authorized to perform this action.");
+      return;
+    }
+
+    next();
+  };
+}
+
+export function requireAnyAdminPermission(permissions: readonly AdminPermission[]) {
+  return (req: Request, res: ExpressResponse, next: NextFunction): void => {
+    const requestWithAuth = req as AuthenticatedRequest;
+    const profile = requestWithAuth.adminProfile;
+
+    if (!profile) {
+      sendError(res, 403, "FORBIDDEN", "Active admin profile is required.");
+      return;
+    }
+
+    if (!hasAnyPermission(profile, permissions)) {
       sendError(res, 403, "FORBIDDEN", "You are not authorized to perform this action.");
       return;
     }

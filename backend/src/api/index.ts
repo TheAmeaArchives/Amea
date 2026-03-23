@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { adminRouter } from "../routes/admin.js";
+import { publicRouter } from "../routes/public.js";
 
 export const apiRouter = Router();
 
@@ -7,3 +9,6 @@ apiRouter.get("/", (_req, res) => {
     message: "API ready",
   });
 });
+
+apiRouter.use("/public", publicRouter);
+apiRouter.use("/admin", adminRouter);

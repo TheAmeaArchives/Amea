@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Upload, X, Loader2, AlertCircle, Video } from "lucide-react";
 
@@ -19,7 +18,6 @@ export default function VideoUpload({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const supabase = createClient();
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -42,30 +40,26 @@ export default function VideoUpload({
     setError(null);
 
     try {
-      const ext = file.name.split(".").pop();
-      const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const formData = new FormData();
+      formData.set("file", file);
+      formData.set("folder", folder);
 
-      const { error: uploadError } = await supabase.storage
-        .from("videos")
-        .upload(fileName, file, { upsert: true });
+      const response = await fetch("/api/admin/uploads/video", {
+        method: "POST",
+        body: formData,
+      });
 
-      if (uploadError) {
-        if (uploadError.message.includes("Bucket not found")) {
-          setError("Storage bucket 'videos' not found. Please create it in Supabase Dashboard > Storage.");
-        } else if (uploadError.message.includes("row-level security") || uploadError.message.includes("policy")) {
-          setError("Permission denied. Please check storage bucket policies.");
-        } else {
-          setError(uploadError.message);
-        }
-        console.error("Upload failed:", uploadError);
+      const payload = (await response.json()) as {
+        data?: { url?: string };
+        error?: { message?: string };
+      };
+
+      if (!response.ok || !payload.data?.url) {
+        setError(payload.error?.message ?? "Video upload failed.");
         return;
       }
 
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("videos").getPublicUrl(fileName);
-
-      onChange(publicUrl);
+      onChange(payload.data.url);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed";
       setError(message);

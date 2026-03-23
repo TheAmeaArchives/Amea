@@ -1,15 +1,13 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, isSuperAdmin } from "@/lib/admin";
 import type { AdminProfile } from "@/lib/types";
 import AdminsClient from "./admins-client";
 
 export default async function AdminsPage() {
-  const supabase = createClient();
-
-  const [profile, { data }] = await Promise.all([
+  const [profile, data] = await Promise.all([
     getAdminProfile(),
-    supabase.from("admin_profiles").select("*").order("created_at"),
+    fetchServerData<AdminProfile[]>("/api/v1/admin/admin-profiles"),
   ]);
 
   if (!profile || !isSuperAdmin(profile)) {
@@ -18,7 +16,7 @@ export default async function AdminsPage() {
 
   return (
     <AdminsClient
-      admins={(data as AdminProfile[]) ?? []}
+      admins={data ?? []}
       currentUserId={profile.id}
     />
   );

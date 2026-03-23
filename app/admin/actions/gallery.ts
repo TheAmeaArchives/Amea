@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { requestServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import { revalidatePath } from "next/cache";
 
@@ -34,16 +34,17 @@ export async function createGalleryItem(formData: FormData) {
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "gallery")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
-  const { error } = await supabase.from("gallery_items").insert({
-    title: formData.get("title") as string,
-    description: (formData.get("description") as string) || null,
-    image_url: (formData.get("image_url") as string) || null,
-    video_url: cleanVideoUrl(formData.get("video_url") as string),
-    order_index: parseInt(formData.get("order_index") as string) || 0,
+  await requestServerData({
+    path: "/api/v1/admin/gallery-items",
+    method: "POST",
+    body: {
+      title: formData.get("title") as string,
+      description: (formData.get("description") as string) || null,
+      image_url: (formData.get("image_url") as string) || null,
+      video_url: cleanVideoUrl(formData.get("video_url") as string),
+      order_index: parseInt(formData.get("order_index") as string, 10) || 0,
+    },
   });
-
-  if (error) throw new Error(error.message);
   revalidatePath("/admin/gallery");
   revalidatePath("/gallery");
 }
@@ -52,19 +53,17 @@ export async function updateGalleryItem(id: string, formData: FormData) {
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "gallery")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
-  const { error } = await supabase
-    .from("gallery_items")
-    .update({
+  await requestServerData({
+    path: `/api/v1/admin/gallery-items/${encodeURIComponent(id)}`,
+    method: "PATCH",
+    body: {
       title: formData.get("title") as string,
       description: (formData.get("description") as string) || null,
       image_url: (formData.get("image_url") as string) || null,
       video_url: cleanVideoUrl(formData.get("video_url") as string),
-      order_index: parseInt(formData.get("order_index") as string) || 0,
-    })
-    .eq("id", id);
-
-  if (error) throw new Error(error.message);
+      order_index: parseInt(formData.get("order_index") as string, 10) || 0,
+    },
+  });
   revalidatePath("/admin/gallery");
   revalidatePath("/gallery");
 }
@@ -73,9 +72,10 @@ export async function deleteGalleryItem(id: string) {
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "gallery")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
-  const { error } = await supabase.from("gallery_items").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  await requestServerData({
+    path: `/api/v1/admin/gallery-items/${encodeURIComponent(id)}`,
+    method: "DELETE",
+  });
   revalidatePath("/admin/gallery");
   revalidatePath("/gallery");
 }
@@ -84,18 +84,11 @@ export async function setFeaturedGalleryItem(id: string) {
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "gallery")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
-  
-  // First, unset all featured items
-  await supabase.from("gallery_items").update({ featured: false }).neq("id", "");
-  
-  // Then set the selected item as featured
-  const { error } = await supabase
-    .from("gallery_items")
-    .update({ featured: true })
-    .eq("id", id);
-
-  if (error) throw new Error(error.message);
+  await requestServerData({
+    path: `/api/v1/admin/gallery-items/${encodeURIComponent(id)}/featured`,
+    method: "PATCH",
+    body: { featured: true },
+  });
   revalidatePath("/admin/gallery");
   revalidatePath("/gallery");
 }
@@ -104,13 +97,10 @@ export async function unsetFeaturedGalleryItem(id: string) {
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "gallery")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
-  const { error } = await supabase
-    .from("gallery_items")
-    .update({ featured: false })
-    .eq("id", id);
-
-  if (error) throw new Error(error.message);
+  await requestServerData({
+    path: `/api/v1/admin/gallery-items/${encodeURIComponent(id)}/featured`,
+    method: "DELETE",
+  });
   revalidatePath("/admin/gallery");
   revalidatePath("/gallery");
 }

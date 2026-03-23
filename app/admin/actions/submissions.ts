@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { requestServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import { revalidatePath } from "next/cache";
 
@@ -8,13 +8,11 @@ export async function markContactRead(id: string, read: boolean) {
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "contacts")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
-  const { error } = await supabase
-    .from("contact_submissions")
-    .update({ read })
-    .eq("id", id);
-
-  if (error) throw new Error(error.message);
+  await requestServerData({
+    path: `/api/v1/admin/contact-submissions/${encodeURIComponent(id)}/read`,
+    method: "PATCH",
+    body: { read },
+  });
   revalidatePath("/admin/contacts");
 }
 
@@ -22,13 +20,10 @@ export async function deleteContact(id: string) {
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "contacts")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
-  const { error } = await supabase
-    .from("contact_submissions")
-    .delete()
-    .eq("id", id);
-
-  if (error) throw new Error(error.message);
+  await requestServerData({
+    path: `/api/v1/admin/contact-submissions/${encodeURIComponent(id)}`,
+    method: "DELETE",
+  });
   revalidatePath("/admin/contacts");
 }
 
@@ -36,13 +31,11 @@ export async function updateVolunteerStatus(id: string, status: string) {
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "volunteers")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
-  const { error } = await supabase
-    .from("volunteer_submissions")
-    .update({ status })
-    .eq("id", id);
-
-  if (error) throw new Error(error.message);
+  await requestServerData({
+    path: `/api/v1/admin/volunteer-submissions/${encodeURIComponent(id)}/status`,
+    method: "PATCH",
+    body: { status },
+  });
   revalidatePath("/admin/volunteers");
 }
 
@@ -50,12 +43,9 @@ export async function deleteVolunteer(id: string) {
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "volunteers")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
-  const { error } = await supabase
-    .from("volunteer_submissions")
-    .delete()
-    .eq("id", id);
-
-  if (error) throw new Error(error.message);
+  await requestServerData({
+    path: `/api/v1/admin/volunteer-submissions/${encodeURIComponent(id)}`,
+    method: "DELETE",
+  });
   revalidatePath("/admin/volunteers");
 }

@@ -1,17 +1,17 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import type { ChamberStat, ChamberBelief, ChamberContent } from "@/lib/types";
 import ChambersClient from "./chambers-client";
 
 export default async function ChambersAdminPage() {
-  const supabase = createClient();
-
-  const [profile, statsRes, beliefsRes, contentRes] = await Promise.all([
+  const [profile, payload] = await Promise.all([
     getAdminProfile(),
-    supabase.from("chamber_stats").select("*").order("order_index"),
-    supabase.from("chamber_beliefs").select("*").order("order_index"),
-    supabase.from("chamber_content").select("*").eq("chamber", "iii").order("section"),
+    fetchServerData<{
+      stats: ChamberStat[];
+      beliefs: ChamberBelief[];
+      content: ChamberContent[];
+    }>("/api/v1/admin/chambers"),
   ]);
 
   if (!profile || !hasPermission(profile, "chambers")) {
@@ -20,9 +20,9 @@ export default async function ChambersAdminPage() {
 
   return (
     <ChambersClient
-      stats={(statsRes.data as ChamberStat[]) ?? []}
-      beliefs={(beliefsRes.data as ChamberBelief[]) ?? []}
-      content={(contentRes.data as ChamberContent[]) ?? []}
+      stats={payload?.stats ?? []}
+      beliefs={payload?.beliefs ?? []}
+      content={payload?.content ?? []}
     />
   );
 }

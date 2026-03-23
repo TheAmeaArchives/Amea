@@ -1,20 +1,18 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import type { Program } from "@/lib/types";
 import ProgramsClient from "./programs-client";
 
 export default async function ProgramsAdminPage() {
-  const supabase = createClient();
-
-  const [profile, { data }] = await Promise.all([
+  const [profile, data] = await Promise.all([
     getAdminProfile(),
-    supabase.from("programs").select("*").order("order_index"),
+    fetchServerData<Program[]>("/api/v1/admin/programs"),
   ]);
 
   if (!profile || !hasPermission(profile, "programs")) {
     redirect("/admin");
   }
 
-  return <ProgramsClient programs={(data as Program[]) ?? []} />;
+  return <ProgramsClient programs={data ?? []} />;
 }

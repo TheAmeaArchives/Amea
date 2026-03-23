@@ -48,7 +48,7 @@ async function parseRequestBody(request: NextRequest): Promise<
   }
 }
 
-export async function proxyAuthRoute(request: NextRequest, backendPath: string): Promise<NextResponse> {
+export async function proxyJsonRoute(request: NextRequest, backendPath: string): Promise<NextResponse> {
   const parsedBody = await parseRequestBody(request);
   if (parsedBody.error) {
     return parsedBody.error;
@@ -67,4 +67,8 @@ export async function proxyAuthRoute(request: NextRequest, backendPath: string):
 
   appendSetCookieHeaders(response, result.setCookies);
   return response;
+}
+
+export async function proxyAuthRoute(request: NextRequest, backendPath: string): Promise<NextResponse> {
+  return proxyJsonRoute(request, backendPath);
 }

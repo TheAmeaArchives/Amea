@@ -1,39 +1,21 @@
 import { supporters as fallbackSupporters } from "@/constants";
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getSiteContent } from "@/lib/content";
 import type { TeamMember, Contributor, Supporter } from "@/lib/types";
 import { TeamPageClient } from "./team-client";
 
 const Teams = async () => {
-    const supabase = createClient();
     const content = await getSiteContent();
-
-    const [teamMembersRes, collaboratorsRes, contributorsRes, supportersRes] = await Promise.all([
-        supabase
-            .from("team_members")
-            .select("*")
-            .eq("member_type", "team")
-            .order("order_index"),
-        supabase
-            .from("team_members")
-            .select("*")
-            .eq("member_type", "collaborator")
-            .order("order_index"),
-        supabase
-            .from("contributors")
-            .select("*")
-            .order("created_at", { ascending: false })
-            .limit(6),
-        supabase
-            .from("supporters")
-            .select("*")
-            .order("order_index"),
-    ]);
-
-    const teamMembers = (teamMembersRes.data as TeamMember[] | null) ?? [];
-    const collaborators = (collaboratorsRes.data as TeamMember[] | null) ?? [];
-    const contributors = (contributorsRes.data as Contributor[] | null) ?? [];
-    const dbSupporters = (supportersRes.data as Supporter[] | null) ?? [];
+    const payload = await fetchServerData<{
+        team_members: TeamMember[];
+        collaborators: TeamMember[];
+        contributors: Contributor[];
+        supporters: Supporter[];
+    }>("/api/v1/public/team");
+    const teamMembers = payload?.team_members ?? [];
+    const collaborators = payload?.collaborators ?? [];
+    const contributors = payload?.contributors ?? [];
+    const dbSupporters = payload?.supporters ?? [];
 
     const hasSupporters = dbSupporters.length > 0;
     const supportersList = hasSupporters

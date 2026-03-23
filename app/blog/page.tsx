@@ -1,19 +1,14 @@
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getSiteContent } from "@/lib/content";
 import type { BlogPost } from "@/lib/types";
 import { BlogPageClient } from "./blog-client";
 
 const Blogs = async () => {
-    const supabase = createClient();
     const content = await getSiteContent();
-    
-    const { data: posts } = await supabase
-        .from("blog_posts")
-        .select("*")
-        .eq("published", true)
-        .order("created_at", { ascending: false });
 
-    return <BlogPageClient content={content} posts={(posts as BlogPost[]) ?? []} />;
+    const posts = await fetchServerData<BlogPost[]>("/api/v1/public/blog-posts?published=true");
+
+    return <BlogPageClient content={content} posts={posts ?? []} />;
 };
 
 export default Blogs;

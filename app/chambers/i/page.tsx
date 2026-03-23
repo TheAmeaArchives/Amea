@@ -1,20 +1,16 @@
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getSiteContent } from "@/lib/content";
 import type { Experiment } from "@/lib/types";
 import { ChamberOneClient } from "./chamber-one-client";
 
 const ChamberOne = async () => {
-    const supabase = createClient();
     const content = await getSiteContent();
-    
-    const { data: experiments } = await supabase
-        .from("experiments")
-        .select("*")
-        .eq("published", true)
-        .eq("chamber", "i")
-        .order("created_at", { ascending: false });
 
-    return <ChamberOneClient content={content} experiments={(experiments as Experiment[]) ?? []} />;
+    const experiments = await fetchServerData<Experiment[]>(
+        "/api/v1/public/experiments?published=true&chamber=i"
+    );
+
+    return <ChamberOneClient content={content} experiments={experiments ?? []} />;
 };
 
 export default ChamberOne;

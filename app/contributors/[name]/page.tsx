@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import type { Contributor, ContributorArticle } from "@/lib/types";
 import React from "react";
 import Image from "next/image";
@@ -7,24 +7,17 @@ import { notFound } from "next/navigation";
 
 const IndividualContributorPage = async ({ params }: { params: { name: string } }) => {
     const { name } = params;
-    const supabase = createClient();
-
-    const [contributorRes, articlesRes] = await Promise.all([
-        supabase.from("contributors").select("*").eq("id", name).single(),
-        supabase
-            .from("contributor_articles")
-            .select("*")
-            .eq("contributor_id", name)
-            .order("created_at", { ascending: false }),
-    ]);
-
-    const contributor = contributorRes.data as Contributor | null;
+    const payload = await fetchServerData<{
+        contributor: Contributor;
+        articles: ContributorArticle[];
+    }>(`/api/v1/public/contributors/${encodeURIComponent(name)}`);
+    const contributor = payload?.contributor ?? null;
 
     if (!contributor) {
         notFound();
     }
 
-    const articles = (articlesRes.data as ContributorArticle[] | null) ?? [];
+    const articles = payload?.articles ?? [];
 
     return (
         <>

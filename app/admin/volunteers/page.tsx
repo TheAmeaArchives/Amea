@@ -1,15 +1,13 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import type { VolunteerSubmission } from "@/lib/types";
 import VolunteersClient from "./volunteers-client";
 
 export default async function VolunteersAdminPage() {
-  const supabase = createClient();
-
-  const [profile, { data }] = await Promise.all([
+  const [profile, data] = await Promise.all([
     getAdminProfile(),
-    supabase.from("volunteer_submissions").select("*").order("created_at", { ascending: false }),
+    fetchServerData<VolunteerSubmission[]>("/api/v1/admin/volunteer-submissions"),
   ]);
 
   if (!profile || !hasPermission(profile, "volunteers")) {
@@ -17,6 +15,6 @@ export default async function VolunteersAdminPage() {
   }
 
   return (
-    <VolunteersClient volunteers={(data as VolunteerSubmission[]) ?? []} />
+    <VolunteersClient volunteers={data ?? []} />
   );
 }

@@ -1,19 +1,13 @@
 import React from 'react';
 import { Bookmark, Heart, MessageCircle } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import type { Experiment } from "@/lib/types";
 import { notFound } from "next/navigation";
 
 const ExperimentsPage = async ({ params }: { params: { slug: string } }) => {
-    const supabase = createClient();
-    const { data: experiment } = await supabase
-        .from("experiments")
-        .select("*")
-        .eq("slug", params.slug)
-        .eq("published", true)
-        .single();
-
-    const post = experiment as Experiment | null;
+    const post = await fetchServerData<Experiment>(
+        `/api/v1/public/experiments/${encodeURIComponent(params.slug)}`
+    );
 
     if (!post) {
         notFound();

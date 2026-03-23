@@ -46,7 +46,6 @@ interface AdminsClientProps {
 
 interface CreateFormState {
   email: string;
-  password: string;
   full_name: string;
   role: AdminRole;
   permissions: Permission[];
@@ -61,7 +60,6 @@ interface EditFormState {
 
 const defaultCreateForm: CreateFormState = {
   email: "",
-  password: "",
   full_name: "",
   role: "admin",
   permissions: [],
@@ -126,7 +124,7 @@ export default function AdminsClient({
   }
 
   async function handleCreate() {
-    if (!createForm.email.trim() || !createForm.password || !createForm.full_name.trim()) {
+    if (!createForm.email.trim() || !createForm.full_name.trim()) {
       toast({ title: "All fields are required", variant: "destructive" });
       return;
     }
@@ -135,7 +133,6 @@ export default function AdminsClient({
     try {
       const fd = new FormData();
       fd.set("email", createForm.email);
-      fd.set("password", createForm.password);
       fd.set("full_name", createForm.full_name);
       fd.set("role", createForm.role);
       fd.set(
@@ -371,18 +368,6 @@ export default function AdminsClient({
                   setCreateForm({ ...createForm, email: e.target.value })
                 }
                 placeholder="admin@example.com"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="create-password">Password *</Label>
-              <Input
-                id="create-password"
-                type="password"
-                value={createForm.password}
-                onChange={(e) =>
-                  setCreateForm({ ...createForm, password: e.target.value })
-                }
-                placeholder="Minimum 6 characters"
               />
             </div>
             <div className="space-y-2">

@@ -1,27 +1,17 @@
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getSiteContent } from "@/lib/content";
-import type { ChamberStat, ChamberBelief, SiteContentMap } from "@/lib/types";
+import type { ChamberStat, ChamberBelief } from "@/lib/types";
 import ChamberTwoClient from "./chamber-two-client";
 
 const ChamberTwoPage = async () => {
-    const supabase = createClient();
     const content = await getSiteContent();
 
-    const [statsRes, beliefsRes] = await Promise.all([
-        supabase
-            .from("chamber_stats")
-            .select("*")
-            .eq("chamber", "ii")
-            .order("order_index"),
-        supabase
-            .from("chamber_beliefs")
-            .select("*")
-            .eq("chamber", "ii")
-            .order("order_index"),
-    ]);
-
-    const chamberStats = (statsRes.data as ChamberStat[] | null) ?? [];
-    const chamberBeliefs = (beliefsRes.data as ChamberBelief[] | null) ?? [];
+    const chamberData = await fetchServerData<{
+        stats: ChamberStat[];
+        beliefs: ChamberBelief[];
+    }>("/api/v1/public/chambers/ii");
+    const chamberStats = chamberData?.stats ?? [];
+    const chamberBeliefs = chamberData?.beliefs ?? [];
 
     const stats = chamberStats.map((s) => ({ count: s.value, text: s.label }));
     const beliefs = chamberBeliefs.map((b) => ({ name: b.title, description: b.content ?? "" }));

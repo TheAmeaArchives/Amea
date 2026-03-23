@@ -1,18 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getSiteContent } from "@/lib/content";
 import type { Program } from "@/lib/types";
 import { ProgramsPageClient } from "./programs-client";
 
 const Programs = async () => {
-    const supabase = createClient();
     const content = await getSiteContent();
-    
-    const { data } = await supabase
-        .from("programs")
-        .select("*")
-        .order("order_index", { ascending: true });
+    const data = await fetchServerData<Program[]>("/api/v1/public/programs");
 
-    return <ProgramsPageClient content={content} programs={(data as Program[]) ?? []} />;
+    return <ProgramsPageClient content={content} programs={data ?? []} />;
 };
 
 export default Programs;

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -17,17 +17,14 @@ import type { BlogPost } from "@/lib/types";
 import BlogActions from "./blog-actions";
 
 export default async function AdminBlogPage() {
-  const supabase = createClient();
-
-  // Fetch auth and data in parallel
-  const [profile, { data: posts }] = await Promise.all([
+  const [profile, posts] = await Promise.all([
     getAdminProfile(),
-    supabase.from("blog_posts").select("*").order("created_at", { ascending: false }),
+    fetchServerData<BlogPost[]>("/api/v1/admin/blog-posts"),
   ]);
 
   if (!profile || !hasPermission(profile, "blog")) redirect("/admin");
 
-  const blogPosts = (posts ?? []) as BlogPost[];
+  const blogPosts = posts ?? [];
 
   return (
     <div className="space-y-6">

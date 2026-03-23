@@ -1,22 +1,9 @@
 import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import type { AdminProfile, Permission } from "@/lib/types";
 
 export const getAdminProfile = cache(async (): Promise<AdminProfile | null> => {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return null;
-
-  const { data } = await supabase
-    .from("admin_profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  return data as AdminProfile | null;
+  return fetchServerData<AdminProfile>("/api/v1/admin/current-admin/profile");
 });
 
 export function hasPermission(

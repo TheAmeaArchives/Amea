@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { requestServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import { revalidatePath } from "next/cache";
 
@@ -8,20 +8,25 @@ export async function upsertChamberStat(id: string | null, formData: FormData) {
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "chambers")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
   const data = {
     label: formData.get("label") as string,
     value: formData.get("value") as string,
     chamber: "ii",
-    order_index: parseInt(formData.get("order_index") as string) || 0,
+    order_index: parseInt(formData.get("order_index") as string, 10) || 0,
   };
 
   if (id) {
-    const { error } = await supabase.from("chamber_stats").update(data).eq("id", id);
-    if (error) throw new Error(error.message);
+    await requestServerData({
+      path: `/api/v1/admin/chamber-stats/${encodeURIComponent(id)}`,
+      method: "PATCH",
+      body: data,
+    });
   } else {
-    const { error } = await supabase.from("chamber_stats").insert(data);
-    if (error) throw new Error(error.message);
+    await requestServerData({
+      path: "/api/v1/admin/chamber-stats",
+      method: "POST",
+      body: data,
+    });
   }
 
   revalidatePath("/admin/chambers");
@@ -32,9 +37,10 @@ export async function deleteChamberStat(id: string) {
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "chambers")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
-  const { error } = await supabase.from("chamber_stats").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  await requestServerData({
+    path: `/api/v1/admin/chamber-stats/${encodeURIComponent(id)}`,
+    method: "DELETE",
+  });
   revalidatePath("/admin/chambers");
   revalidatePath("/chambers/ii");
 }
@@ -43,20 +49,25 @@ export async function upsertChamberBelief(id: string | null, formData: FormData)
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "chambers")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
   const data = {
     title: formData.get("title") as string,
     content: (formData.get("content") as string) || null,
     chamber: "ii",
-    order_index: parseInt(formData.get("order_index") as string) || 0,
+    order_index: parseInt(formData.get("order_index") as string, 10) || 0,
   };
 
   if (id) {
-    const { error } = await supabase.from("chamber_beliefs").update(data).eq("id", id);
-    if (error) throw new Error(error.message);
+    await requestServerData({
+      path: `/api/v1/admin/chamber-beliefs/${encodeURIComponent(id)}`,
+      method: "PATCH",
+      body: data,
+    });
   } else {
-    const { error } = await supabase.from("chamber_beliefs").insert(data);
-    if (error) throw new Error(error.message);
+    await requestServerData({
+      path: "/api/v1/admin/chamber-beliefs",
+      method: "POST",
+      body: data,
+    });
   }
 
   revalidatePath("/admin/chambers");
@@ -67,9 +78,10 @@ export async function deleteChamberBelief(id: string) {
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "chambers")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
-  const { error } = await supabase.from("chamber_beliefs").delete().eq("id", id);
-  if (error) throw new Error(error.message);
+  await requestServerData({
+    path: `/api/v1/admin/chamber-beliefs/${encodeURIComponent(id)}`,
+    method: "DELETE",
+  });
   revalidatePath("/admin/chambers");
   revalidatePath("/chambers/ii");
 }
@@ -78,7 +90,6 @@ export async function upsertChamberContent(id: string | null, formData: FormData
   const profile = await getAdminProfile();
   if (!hasPermission(profile, "chambers")) throw new Error("Unauthorized");
 
-  const supabase = createClient();
   const data = {
     chamber: formData.get("chamber") as string,
     section: formData.get("section") as string,
@@ -86,11 +97,17 @@ export async function upsertChamberContent(id: string | null, formData: FormData
   };
 
   if (id) {
-    const { error } = await supabase.from("chamber_content").update(data).eq("id", id);
-    if (error) throw new Error(error.message);
+    await requestServerData({
+      path: `/api/v1/admin/chamber-content/${encodeURIComponent(id)}`,
+      method: "PATCH",
+      body: data,
+    });
   } else {
-    const { error } = await supabase.from("chamber_content").insert(data);
-    if (error) throw new Error(error.message);
+    await requestServerData({
+      path: "/api/v1/admin/chamber-content",
+      method: "POST",
+      body: data,
+    });
   }
 
   revalidatePath("/admin/chambers");

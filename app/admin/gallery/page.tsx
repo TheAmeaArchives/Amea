@@ -1,21 +1,18 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import type { GalleryItem } from "@/lib/types";
 import GalleryClient from "./gallery-client";
 
 export default async function GalleryAdminPage() {
-  const supabase = createClient();
-
-  // Fetch auth and data in parallel
-  const [profile, { data }] = await Promise.all([
+  const [profile, data] = await Promise.all([
     getAdminProfile(),
-    supabase.from("gallery_items").select("*").order("order_index"),
+    fetchServerData<GalleryItem[]>("/api/v1/admin/gallery-items"),
   ]);
 
   if (!profile || !hasPermission(profile, "gallery")) {
     redirect("/admin");
   }
 
-  return <GalleryClient items={(data as GalleryItem[]) ?? []} />;
+  return <GalleryClient items={data ?? []} />;
 }

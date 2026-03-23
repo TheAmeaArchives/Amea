@@ -1,5 +1,5 @@
 import { getAdminProfile, hasPermission } from "@/lib/admin";
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { redirect } from "next/navigation";
 import {
   Card,
@@ -27,24 +27,16 @@ interface StatCard {
 }
 
 export default async function AdminDashboard() {
-  const supabase = createClient();
-
-  const [
-    profile,
-    { count: blogCount },
-    { count: experimentCount },
-    { count: teamCount },
-    { count: galleryCount },
-    { count: contactCount },
-    { count: volunteerCount },
-  ] = await Promise.all([
+  const [profile, dashboardStats] = await Promise.all([
     getAdminProfile(),
-    supabase.from("blog_posts").select("*", { count: "exact", head: true }),
-    supabase.from("experiments").select("*", { count: "exact", head: true }),
-    supabase.from("team_members").select("*", { count: "exact", head: true }),
-    supabase.from("gallery_items").select("*", { count: "exact", head: true }),
-    supabase.from("contact_submissions").select("*", { count: "exact", head: true }).eq("read", false),
-    supabase.from("volunteer_submissions").select("*", { count: "exact", head: true }).eq("status", "pending"),
+    fetchServerData<{
+      blog_count: number;
+      experiment_count: number;
+      team_count: number;
+      gallery_count: number;
+      unread_contact_count: number;
+      pending_volunteer_count: number;
+    }>("/api/v1/admin/dashboard/stats"),
   ]);
 
   if (!profile) redirect("/admin/login");
@@ -52,42 +44,42 @@ export default async function AdminDashboard() {
   const stats: StatCard[] = [
     {
       label: "Blog Posts",
-      count: blogCount ?? 0,
+      count: dashboardStats?.blog_count ?? 0,
       icon: <FileText size={24} />,
       href: "/admin/blog",
       permission: "blog",
     },
     {
       label: "Experiments",
-      count: experimentCount ?? 0,
+      count: dashboardStats?.experiment_count ?? 0,
       icon: <FlaskConical size={24} />,
       href: "/admin/experiments",
       permission: "experiments",
     },
     {
       label: "Team Members",
-      count: teamCount ?? 0,
+      count: dashboardStats?.team_count ?? 0,
       icon: <Users size={24} />,
       href: "/admin/team",
       permission: "team",
     },
     {
       label: "Gallery Items",
-      count: galleryCount ?? 0,
+      count: dashboardStats?.gallery_count ?? 0,
       icon: <ImageIcon size={24} />,
       href: "/admin/gallery",
       permission: "gallery",
     },
     {
       label: "Unread Contacts",
-      count: contactCount ?? 0,
+      count: dashboardStats?.unread_contact_count ?? 0,
       icon: <Mail size={24} />,
       href: "/admin/contacts",
       permission: "contacts",
     },
     {
       label: "Pending Volunteers",
-      count: volunteerCount ?? 0,
+      count: dashboardStats?.pending_volunteer_count ?? 0,
       icon: <HandHelping size={24} />,
       href: "/admin/volunteers",
       permission: "volunteers",

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -17,17 +17,14 @@ import type { Experiment } from "@/lib/types";
 import ExperimentActions from "./experiment-actions";
 
 export default async function AdminExperimentsPage() {
-  const supabase = createClient();
-
-  // Fetch auth and data in parallel
-  const [profile, { data: experiments }] = await Promise.all([
+  const [profile, experiments] = await Promise.all([
     getAdminProfile(),
-    supabase.from("experiments").select("*").order("created_at", { ascending: false }),
+    fetchServerData<Experiment[]>("/api/v1/admin/experiments"),
   ]);
 
   if (!profile || !hasPermission(profile, "experiments")) redirect("/admin");
 
-  const items = (experiments ?? []) as Experiment[];
+  const items = experiments ?? [];
 
   return (
     <div className="space-y-6">

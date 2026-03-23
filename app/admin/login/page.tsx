@@ -1,40 +1,119 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 
+type ErrorPayload = {
+  error?: {
+    message?: string;
+  };
+};
+
+async function parseErrorMessage(response: Response, fallback: string): Promise<string> {
+  try {
+    const payload = (await response.json()) as ErrorPayload;
+    return payload.error?.message ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
+  const [otpRequested, setOtpRequested] = useState(false);
+  const [requestingOtp, setRequestingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    if (!otpRequested) {
+      setRequestingOtp(true);
+      try {
+        const response = await fetch("/api/auth/otp/request", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({ email: email.trim() }),
+        });
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
+        if (!response.ok) {
+          setError(await parseErrorMessage(response, "Failed to send verification code."));
+          return;
+        }
+
+        setOtpRequested(true);
+        setOtp("");
+      } finally {
+        setRequestingOtp(false);
+        setLoading(false);
+      }
       return;
     }
 
-    router.push("/admin");
-    router.refresh();
+    setVerifyingOtp(true);
+    try {
+      const response = await fetch("/api/auth/otp/verify", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          otp: otp.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        setError(await parseErrorMessage(response, "Invalid verification code."));
+        return;
+      }
+
+      router.push("/admin");
+      router.refresh();
+    } finally {
+      setVerifyingOtp(false);
+      setLoading(false);
+    }
   }
+
+  async function resendOtp() {
+    if (!email.trim()) {
+      setError("Email is required.");
+      return;
+    }
+
+    setError("");
+    setRequestingOtp(true);
+    try {
+      const response = await fetch("/api/auth/otp/request", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      if (!response.ok) {
+        setError(await parseErrorMessage(response, "Failed to resend verification code."));
+      }
+    } finally {
+      setRequestingOtp(false);
+    }
+  }
+
+  const isBusy = loading || requestingOtp || verifyingOtp;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
@@ -59,31 +138,52 @@ export default function AdminLoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={otpRequested}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          {otpRequested && (
+            <div className="space-y-2">
+              <Label htmlFor="otp">One-Time Passcode</Label>
+              <Input
+                id="otp"
+                type="text"
+                inputMode="numeric"
+                placeholder="Enter the code sent to your email"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                required
+              />
+            </div>
+          )}
 
           {error && (
             <p className="text-sm text-default font-medium">{error}</p>
           )}
 
+          {otpRequested && (
+            <button
+              type="button"
+              onClick={resendOtp}
+              className="text-sm text-default hover:underline disabled:opacity-60"
+              disabled={requestingOtp}
+            >
+              {requestingOtp ? "Resending..." : "Resend code"}
+            </button>
+          )}
+
           <Button
             type="submit"
             className="w-full"
-            disabled={loading}
+            disabled={isBusy || (otpRequested && !otp.trim())}
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {!otpRequested && isBusy
+              ? "Sending code..."
+              : otpRequested && isBusy
+                ? "Signing in..."
+                : otpRequested
+                  ? "Verify & Sign In"
+                  : "Send Verification Code"}
           </Button>
         </form>
       </div>

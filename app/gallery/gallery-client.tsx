@@ -33,9 +33,8 @@ export function GalleryPageClient({ content, items, featuredItem }: GalleryPageC
   const isDirectVideoUrl = (url: string) => {
     const videoExtensions = [".mp4", ".webm", ".ogg", ".mov"];
     const hasVideoExtension = videoExtensions.some(ext => url.toLowerCase().includes(ext));
-    // Also check for Supabase storage video bucket URLs
-    const isSupabaseVideo = url.includes("supabase") && url.includes("/videos/");
-    return hasVideoExtension || isSupabaseVideo;
+    const isUploadVideo = url.includes("/videos/") || url.includes("/uploads/");
+    return hasVideoExtension || isUploadVideo;
   };
 
   const getYouTubeEmbedUrl = (url: string) => {

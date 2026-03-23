@@ -1,6 +1,5 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
 import React, { FormEventHandler, useState } from "react";
 import { X } from "lucide-react";
 import Image from "next/image";
@@ -52,12 +51,21 @@ function VolunteerFormModal({ setIsVolunteerFormActive, setIsValidationPageActiv
         setIsSubmitting(true);
 
         try {
-            const supabase = createClient();
-            await supabase.from("volunteer_submissions").insert({
-                name: formState.name,
-                email: formState.email,
-                whatsapp: formState.whatsapp || null,
+            const response = await fetch("/api/public/volunteer-submissions", {
+                method: "POST",
+                headers: {
+                    "content-type": "application/json",
+                },
+                body: JSON.stringify({
+                    name: formState.name,
+                    email: formState.email,
+                    whatsapp: formState.whatsapp || null,
+                }),
             });
+
+            if (!response.ok) {
+                throw new Error("Request failed");
+            }
         } catch {
             // Submission failed silently — still show validation page
         } finally {

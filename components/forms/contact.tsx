@@ -1,6 +1,5 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import React, { FormEventHandler, useState } from "react";
 import type { SiteContentMap } from "@/lib/types";
@@ -24,12 +23,22 @@ const ContactForm = ({ content }: ContactFormProps) => {
     setIsSubmitting(true);
 
     try {
-      const supabase = createClient();
-      await supabase.from("contact_submissions").insert({
-        name: formState.name,
-        email: formState.email,
-        message: formState.message,
+      const response = await fetch("/api/public/contact-submissions", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formState.name,
+          email: formState.email,
+          message: formState.message,
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error("Request failed");
+      }
+
       setSubmitted(true);
       setFormState({ name: "", email: "", message: "" });
     } catch {

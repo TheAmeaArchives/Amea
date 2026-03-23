@@ -1,19 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getSiteContent } from "@/lib/content";
 import type { ChamberContent } from "@/lib/types";
 import { ChamberThreeClient } from "./chamber-three-client";
 
 const ChamberThree = async () => {
-    const supabase = createClient();
     const content = await getSiteContent();
-    
-    const { data } = await supabase
-        .from("chamber_content")
-        .select("*")
-        .eq("chamber", "iii")
-        .order("section");
+    const data = await fetchServerData<ChamberContent[]>("/api/v1/public/chambers/iii/content");
 
-    return <ChamberThreeClient content={content} chamberContent={(data as ChamberContent[]) ?? []} />;
+    return <ChamberThreeClient content={content} chamberContent={data ?? []} />;
 };
 
 export default ChamberThree;

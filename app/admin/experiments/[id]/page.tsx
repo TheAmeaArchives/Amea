@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
@@ -13,14 +13,11 @@ export default async function EditExperimentPage({
   const profile = await getAdminProfile();
   if (!profile || !hasPermission(profile, "experiments")) redirect("/admin");
 
-  const supabase = createClient();
-  const { data: experiment } = await supabase
-    .from("experiments")
-    .select("*")
-    .eq("id", params.id)
-    .single();
+  const experiment = await fetchServerData<Experiment>(
+    `/api/v1/admin/experiments/${encodeURIComponent(params.id)}`
+  );
 
   if (!experiment) notFound();
 
-  return <ExperimentEditForm experiment={experiment as Experiment} />;
+  return <ExperimentEditForm experiment={experiment} />;
 }

@@ -1,5 +1,5 @@
 import React from "react";
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import type { BlogPost } from "@/lib/types";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -7,15 +7,9 @@ import { ArrowLeft } from "lucide-react";
 import { BlogContentRenderer } from "@/components/blog/blog-content-renderer";
 
 const BlogPostPage = async ({ params }: { params: { slug: string } }) => {
-    const supabase = createClient();
-    const { data } = await supabase
-        .from("blog_posts")
-        .select("*")
-        .eq("slug", params.slug)
-        .eq("published", true)
-        .single();
-
-    const post = data as BlogPost | null;
+    const post = await fetchServerData<BlogPost>(
+        `/api/v1/public/blog-posts/${encodeURIComponent(params.slug)}`
+    );
 
     if (!post) {
         notFound();

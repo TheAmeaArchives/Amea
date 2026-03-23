@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { fetchServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, hasPermission } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
@@ -13,14 +13,9 @@ export default async function EditBlogPostPage({
   const profile = await getAdminProfile();
   if (!profile || !hasPermission(profile, "blog")) redirect("/admin");
 
-  const supabase = createClient();
-  const { data: post } = await supabase
-    .from("blog_posts")
-    .select("*")
-    .eq("id", params.id)
-    .single();
+  const post = await fetchServerData<BlogPost>(`/api/v1/admin/blog-posts/${encodeURIComponent(params.id)}`);
 
   if (!post) notFound();
 
-  return <BlogEditForm post={post as BlogPost} />;
+  return <BlogEditForm post={post} />;
 }

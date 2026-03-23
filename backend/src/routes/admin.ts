@@ -27,6 +27,7 @@ import {
 } from "../db/schema.js";
 import {
   adminPermissions,
+  requireAnyAdminPermission,
   requireAdminPermission,
   requireAdminProfile,
   requireSession,
@@ -41,6 +42,19 @@ const upload = multer({
     fileSize: env.UPLOAD_VIDEO_MAX_BYTES,
   },
 });
+
+const imageUploadPermissions = [
+  "blog",
+  "experiments",
+  "team",
+  "gallery",
+  "programs",
+  "supporters",
+  "site_content",
+  "chambers",
+] as const;
+
+const videoUploadPermissions = ["gallery"] as const;
 
 const adminProfileSchema = z.object({
   id: z.string().trim().min(1).optional(),
@@ -1484,7 +1498,7 @@ adminRouter.delete(
   },
 );
 
-adminRouter.post("/uploads/image", (req, res) => {
+adminRouter.post("/uploads/image", requireAnyAdminPermission(imageUploadPermissions), (req, res) => {
   upload.single("file")(req, res, async (error) => {
     if (error) {
       if (error instanceof MulterError && error.code === "LIMIT_FILE_SIZE") {
@@ -1531,7 +1545,7 @@ adminRouter.post("/uploads/image", (req, res) => {
   });
 });
 
-adminRouter.post("/uploads/video", (req, res) => {
+adminRouter.post("/uploads/video", requireAnyAdminPermission(videoUploadPermissions), (req, res) => {
   upload.single("file")(req, res, async (error) => {
     if (error) {
       if (error instanceof MulterError && error.code === "LIMIT_FILE_SIZE") {

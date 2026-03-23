@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { hasSessionPayload, requestInternalApi } from "@/lib/backend/internal-api";
+
+function appendSetCookieHeaders(response: NextResponse, setCookies: string[]): void {
+  for (const cookieHeader of setCookies) {
+    response.headers.append("set-cookie", cookieHeader);
+  }
+}
 
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone();
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: { headers: request.headers },
   });
 
@@ -17,46 +23,32 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value)
-          );
-          response = NextResponse.next({
-            request: { headers: request.headers },
-          });
-          response.headers.set("x-url", url.pathname);
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
+  const sessionResult = await requestInternalApi({
+    path: "/api/v1/auth/session",
+    method: "GET",
+    cookieHeader: request.headers.get("cookie"),
+    forwardedFor: request.headers.get("x-forwarded-for"),
+  });
 
-  // Use getSession() for fast local JWT check (no network call)
-  // The layout will do the full getUser() verification
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  appendSetCookieHeaders(response, sessionResult.setCookies);
+  const session = sessionResult.ok && hasSessionPayload(sessionResult.data);
 
   if (!session && !isLoginPage) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/admin/login";
-    return NextResponse.redirect(loginUrl);
+    const redirectResponse = NextResponse.redirect(loginUrl);
+    appendSetCookieHeaders(redirectResponse, sessionResult.setCookies);
+    redirectResponse.headers.set("x-url", url.pathname);
+    return redirectResponse;
   }
 
   if (session && isLoginPage) {
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = "/admin";
-    return NextResponse.redirect(dashboardUrl);
+    const redirectResponse = NextResponse.redirect(dashboardUrl);
+    appendSetCookieHeaders(redirectResponse, sessionResult.setCookies);
+    redirectResponse.headers.set("x-url", url.pathname);
+    return redirectResponse;
   }
 
   return response;

@@ -36,6 +36,8 @@ function clearLegacySupabaseCookies(): void {
   const allCookies = cookieStore.getAll();
 
   for (const cookie of allCookies) {
+    // Compatibility: clear stale pre-migration auth cookies to avoid mixed-session behavior
+    // for returning users still carrying historical Supabase cookie names.
     if (cookie.name.includes("supabase") || cookie.name.includes("sb-")) {
       cookieStore.delete(cookie.name);
     }

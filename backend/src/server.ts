@@ -1,6 +1,6 @@
-import { app } from "./app";
-import { env } from "./config/env";
-import { pool } from "./db";
+import { app } from "./app.js";
+import { env } from "./config/env.js";
+import { pool } from "./db/index.js";
 
 const server = app.listen(env.PORT, env.HOST, () => {
   console.log(`Backend listening on http://${env.HOST}:${env.PORT}`);

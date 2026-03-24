@@ -8,6 +8,20 @@
       "when": 1774290484968,
       "tag": "0000_nappy_bloodscream",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774292891511,
+      "tag": "0001_equal_eddie_brock",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774295947049,
+      "tag": "0002_exotic_harry_osborn",
+      "breakpoints": true
     }
   ]
 }

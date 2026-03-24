@@ -1,6 +1,6 @@
 import path from "node:path";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
-import { db, pool } from "./index";
+import { db, pool } from "./index.js";
 
 async function main(): Promise<void> {
   const migrationsFolder = path.resolve(process.cwd(), "drizzle");

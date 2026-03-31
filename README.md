@@ -4,24 +4,25 @@ This project now runs as a split application:
 
 - The root app is a `Next.js` frontend.
 - The `backend/` app is an `Express + Drizzle + PostgreSQL` API.
-- The frontend talks to the backend through local proxy routes in `app/api/**`.
+- The frontend owns the public Better Auth route at `app/api/auth/[...all]`.
+- The frontend proxies public submissions and upload requests to the backend through `app/api/**`.
 
 ## How The Migration Works
 
 The migration moved data, auth, submissions, admin actions, and uploads out of the Next.js app and into the standalone backend.
 
-- `Next.js` is responsible for UI rendering and calling local route handlers.
-- `app/api/auth/*`, `app/api/public/*`, and `app/api/admin/uploads/*` proxy requests to the backend.
+- `Next.js` is responsible for UI rendering, the public Better Auth route, and calling local route handlers.
+- `app/api/public/*` and `app/api/admin/uploads/*` proxy requests to the backend.
 - The backend exposes:
   - `GET /health`
-  - `POST/GET /api/auth/*`
   - `GET/POST /api/public/*`
   - `GET/POST/PATCH/DELETE /api/admin/*`
 - Database schema and migrations live in [`backend/drizzle`](/Users/djimijosias/code/amea/Amea/backend/drizzle).
 - Drizzle runs migrations through [`backend/src/db/migrate.ts`](/Users/djimijosias/code/amea/Amea/backend/src/db/migrate.ts).
-- Uploaded files are stored by the backend and served from `/uploads`.
+- Uploaded images are stored in AWS S3 and saved as public media URLs.
+- Uploaded videos still use backend local storage and are served from `/uploads`.
 
-In practice, the frontend remains the public entrypoint, but the backend is now the source of truth for persistence and auth.
+In practice, the frontend remains the public entrypoint, Better Auth is used directly in the Next app on both client and server, and the backend remains the source of truth for persistence and admin data.
 
 ## Environment Setup
 
@@ -44,6 +45,12 @@ These are the values that must be set for the migrated setup to work end-to-end:
 - `RESEND_FROM_EMAIL`
 - `AUTH_TRUSTED_ORIGINS`
 - `INTERNAL_API_BASE_URL`
+- `NEXT_PUBLIC_AUTH_URL`
+- `AWS_S3_PUBLIC_BASE_URL`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_S3_BUCKET`
+- `AWS_S3_REGION`
 
 Common local defaults are already included in `.env.example` for:
 
@@ -57,6 +64,9 @@ Common local defaults are already included in `.env.example` for:
 - `AUTH_REQUEST_RATE_LIMIT_WINDOW_SECONDS`
 - `AUTH_REQUEST_RATE_LIMIT_MAX`
 - `AUTH_DISABLE_SIGNUP`
+- `AWS_S3_ENDPOINT`
+- `AWS_S3_KEY_PREFIX`
+- `AWS_S3_FORCE_PATH_STYLE`
 - `UPLOAD_PUBLIC_BASE_URL`
 - `UPLOAD_DIRECTORY`
 - `UPLOAD_IMAGE_MAX_BYTES`
@@ -110,9 +120,9 @@ Local defaults:
 With the migration in place, requests flow like this:
 
 1. Browser hits the Next.js app.
-2. Next route handlers proxy auth/public/upload requests to the backend.
-3. The backend reads and writes PostgreSQL through Drizzle.
-4. The backend returns JSON or upload URLs.
+2. Better Auth client calls the Next app’s `/api/auth/*` route handler directly.
+3. Next proxies public submission and upload requests to the backend.
+4. The backend stores uploaded images in S3, stores uploaded videos locally, and reads/writes PostgreSQL through Drizzle.
 5. The frontend renders the result.
 
-This means the backend must be running for auth, admin actions, uploads, contact submissions, volunteer submissions, and database-backed content to work.
+This means the backend must be running for auth, admin actions, uploads, contact submissions, volunteer submissions, and database-backed content to work. S3 credentials must also be configured before image uploads and previews will work.

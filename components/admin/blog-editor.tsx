@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
@@ -25,6 +25,8 @@ const EditorComponent = dynamic(
 
 export function BlogEditor({ initialContent, onChange, placeholder }: BlogEditorProps) {
   const [mounted, setMounted] = useState(false);
+  const initialContentRef = useRef(initialContent);
+  const placeholderRef = useRef(placeholder);
 
   useEffect(() => {
     setMounted(true);
@@ -40,9 +42,9 @@ export function BlogEditor({ initialContent, onChange, placeholder }: BlogEditor
 
   return (
     <EditorComponent
-      initialContent={initialContent}
+      initialContent={initialContentRef.current}
       onChange={onChange}
-      placeholder={placeholder}
+      placeholder={placeholderRef.current}
     />
   );
 }

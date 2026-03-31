@@ -14,7 +14,7 @@ interface BlogEditorInnerProps {
 export function BlogEditorInner({ initialContent, onChange, placeholder }: BlogEditorInnerProps) {
   const parsedInitialContent = useMemo(() => {
     if (!initialContent) return undefined;
-    
+
     try {
       const parsed = JSON.parse(initialContent);
       if (Array.isArray(parsed)) {
@@ -24,11 +24,16 @@ export function BlogEditorInner({ initialContent, onChange, placeholder }: BlogE
       return undefined;
     }
     return undefined;
-  }, []);
+  }, [initialContent]);
 
   const editor = useCreateBlockNote({
     initialContent: parsedInitialContent,
-  });
+    placeholders: placeholder
+      ? {
+          emptyDocument: placeholder,
+        }
+      : undefined,
+  }, []);
 
   return (
     <div className="blog-editor-wrapper">

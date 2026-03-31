@@ -13,7 +13,7 @@ export default async function EditBlogPostPage({
   const profile = await getAdminProfile();
   if (!profile || !hasPermission(profile, "blog")) redirect("/admin");
 
-  const post = await fetchServerData<BlogPost>(`/api/v1/admin/blog-posts/${encodeURIComponent(params.id)}`);
+  const post = await fetchServerData<BlogPost>(`/api/admin/blog-posts/${encodeURIComponent(params.id)}`);
 
   if (!post) notFound();
 

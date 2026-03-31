@@ -7,7 +7,7 @@ import AdminsClient from "./admins-client";
 export default async function AdminsPage() {
   const [profile, data] = await Promise.all([
     getAdminProfile(),
-    fetchServerData<AdminProfile[]>("/api/v1/admin/admin-profiles"),
+    fetchServerData<AdminProfile[]>("/api/admin/admin-profiles"),
   ]);
 
   if (!profile || !isSuperAdmin(profile)) {

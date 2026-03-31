@@ -9,7 +9,7 @@ export async function createSupporter(formData: FormData) {
   if (!hasPermission(profile, "supporters")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: "/api/v1/admin/supporters",
+    path: "/api/admin/supporters",
     method: "POST",
     body: {
       name: formData.get("name") as string,
@@ -27,7 +27,7 @@ export async function updateSupporter(id: string, formData: FormData) {
   if (!hasPermission(profile, "supporters")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/supporters/${encodeURIComponent(id)}`,
+    path: `/api/admin/supporters/${encodeURIComponent(id)}`,
     method: "PATCH",
     body: {
       name: formData.get("name") as string,
@@ -45,7 +45,7 @@ export async function deleteSupporter(id: string) {
   if (!hasPermission(profile, "supporters")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/supporters/${encodeURIComponent(id)}`,
+    path: `/api/admin/supporters/${encodeURIComponent(id)}`,
     method: "DELETE",
   });
   revalidatePath("/admin/supporters");

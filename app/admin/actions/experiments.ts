@@ -9,7 +9,7 @@ export async function createExperiment(formData: FormData) {
   if (!hasPermission(profile, "experiments")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: "/api/v1/admin/experiments",
+    path: "/api/admin/experiments",
     method: "POST",
     body: {
       title: formData.get("title") as string,
@@ -32,7 +32,7 @@ export async function updateExperiment(id: string, formData: FormData) {
   if (!hasPermission(profile, "experiments")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/experiments/${encodeURIComponent(id)}`,
+    path: `/api/admin/experiments/${encodeURIComponent(id)}`,
     method: "PATCH",
     body: {
       title: formData.get("title") as string,
@@ -55,7 +55,7 @@ export async function deleteExperiment(id: string) {
   if (!hasPermission(profile, "experiments")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/experiments/${encodeURIComponent(id)}`,
+    path: `/api/admin/experiments/${encodeURIComponent(id)}`,
     method: "DELETE",
   });
   revalidatePath("/admin/experiments");
@@ -67,7 +67,7 @@ export async function toggleExperimentPublished(id: string, published: boolean) 
   if (!hasPermission(profile, "experiments")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/experiments/${encodeURIComponent(id)}/published`,
+    path: `/api/admin/experiments/${encodeURIComponent(id)}/published`,
     method: "PATCH",
     body: { published },
   });

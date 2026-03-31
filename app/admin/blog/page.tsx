@@ -19,7 +19,7 @@ import BlogActions from "./blog-actions";
 export default async function AdminBlogPage() {
   const [profile, posts] = await Promise.all([
     getAdminProfile(),
-    fetchServerData<BlogPost[]>("/api/v1/admin/blog-posts"),
+    fetchServerData<BlogPost[]>("/api/admin/blog-posts"),
   ]);
 
   if (!profile || !hasPermission(profile, "blog")) redirect("/admin");

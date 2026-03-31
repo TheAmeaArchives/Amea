@@ -11,7 +11,7 @@ const Teams = async () => {
         collaborators: TeamMember[];
         contributors: Contributor[];
         supporters: Supporter[];
-    }>("/api/v1/public/team");
+    }>("/api/public/team");
     const teamMembers = payload?.team_members ?? [];
     const collaborators = payload?.collaborators ?? [];
     const contributors = payload?.contributors ?? [];

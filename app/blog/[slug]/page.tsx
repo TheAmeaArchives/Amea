@@ -8,7 +8,7 @@ import { BlogContentRenderer } from "@/components/blog/blog-content-renderer";
 
 const BlogPostPage = async ({ params }: { params: { slug: string } }) => {
     const post = await fetchServerData<BlogPost>(
-        `/api/v1/public/blog-posts/${encodeURIComponent(params.slug)}`
+        `/api/public/blog-posts/${encodeURIComponent(params.slug)}`
     );
 
     if (!post) {

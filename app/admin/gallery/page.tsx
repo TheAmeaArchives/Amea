@@ -7,7 +7,7 @@ import GalleryClient from "./gallery-client";
 export default async function GalleryAdminPage() {
   const [profile, data] = await Promise.all([
     getAdminProfile(),
-    fetchServerData<GalleryItem[]>("/api/v1/admin/gallery-items"),
+    fetchServerData<GalleryItem[]>("/api/admin/gallery-items"),
   ]);
 
   if (!profile || !hasPermission(profile, "gallery")) {

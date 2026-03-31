@@ -25,7 +25,7 @@ function resolveAuthBaseURL(): string {
   }
 
   const host = env.HOST === "0.0.0.0" ? "127.0.0.1" : env.HOST;
-  return `http://${host}:${env.PORT}/api/v1/auth`;
+  return `http://${host}:${env.PORT}/api/auth`;
 }
 
 const trustedOrigins = (env.AUTH_TRUSTED_ORIGINS ?? "")

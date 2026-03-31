@@ -9,7 +9,7 @@ const ChamberTwoPage = async () => {
     const chamberData = await fetchServerData<{
         stats: ChamberStat[];
         beliefs: ChamberBelief[];
-    }>("/api/v1/public/chambers/ii");
+    }>("/api/public/chambers/ii");
     const chamberStats = chamberData?.stats ?? [];
     const chamberBeliefs = chamberData?.beliefs ?? [];
 

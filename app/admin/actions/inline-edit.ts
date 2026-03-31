@@ -11,7 +11,7 @@ export async function updateSiteContent(key: string, value: string) {
   }
 
   await requestServerData({
-    path: `/api/v1/admin/site-content/${encodeURIComponent(key)}`,
+    path: `/api/admin/site-content/${encodeURIComponent(key)}`,
     method: "PUT",
     body: { value },
   });

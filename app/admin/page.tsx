@@ -36,7 +36,7 @@ export default async function AdminDashboard() {
       gallery_count: number;
       unread_contact_count: number;
       pending_volunteer_count: number;
-    }>("/api/v1/admin/dashboard/stats"),
+    }>("/api/admin/dashboard/stats"),
   ]);
 
   if (!profile) redirect("/admin/login");

@@ -9,7 +9,7 @@ export async function createProgram(formData: FormData) {
   if (!hasPermission(profile, "programs")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: "/api/v1/admin/programs",
+    path: "/api/admin/programs",
     method: "POST",
     body: {
       title: formData.get("title") as string,
@@ -28,7 +28,7 @@ export async function updateProgram(id: string, formData: FormData) {
   if (!hasPermission(profile, "programs")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/programs/${encodeURIComponent(id)}`,
+    path: `/api/admin/programs/${encodeURIComponent(id)}`,
     method: "PATCH",
     body: {
       title: formData.get("title") as string,
@@ -47,7 +47,7 @@ export async function deleteProgram(id: string) {
   if (!hasPermission(profile, "programs")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/programs/${encodeURIComponent(id)}`,
+    path: `/api/admin/programs/${encodeURIComponent(id)}`,
     method: "DELETE",
   });
   revalidatePath("/admin/programs");

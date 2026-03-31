@@ -19,7 +19,7 @@ import ExperimentActions from "./experiment-actions";
 export default async function AdminExperimentsPage() {
   const [profile, experiments] = await Promise.all([
     getAdminProfile(),
-    fetchServerData<Experiment[]>("/api/v1/admin/experiments"),
+    fetchServerData<Experiment[]>("/api/admin/experiments"),
   ]);
 
   if (!profile || !hasPermission(profile, "experiments")) redirect("/admin");

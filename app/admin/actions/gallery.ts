@@ -35,7 +35,7 @@ export async function createGalleryItem(formData: FormData) {
   if (!hasPermission(profile, "gallery")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: "/api/v1/admin/gallery-items",
+    path: "/api/admin/gallery-items",
     method: "POST",
     body: {
       title: formData.get("title") as string,
@@ -54,7 +54,7 @@ export async function updateGalleryItem(id: string, formData: FormData) {
   if (!hasPermission(profile, "gallery")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/gallery-items/${encodeURIComponent(id)}`,
+    path: `/api/admin/gallery-items/${encodeURIComponent(id)}`,
     method: "PATCH",
     body: {
       title: formData.get("title") as string,
@@ -73,7 +73,7 @@ export async function deleteGalleryItem(id: string) {
   if (!hasPermission(profile, "gallery")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/gallery-items/${encodeURIComponent(id)}`,
+    path: `/api/admin/gallery-items/${encodeURIComponent(id)}`,
     method: "DELETE",
   });
   revalidatePath("/admin/gallery");
@@ -85,7 +85,7 @@ export async function setFeaturedGalleryItem(id: string) {
   if (!hasPermission(profile, "gallery")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/gallery-items/${encodeURIComponent(id)}/featured`,
+    path: `/api/admin/gallery-items/${encodeURIComponent(id)}/featured`,
     method: "PATCH",
     body: { featured: true },
   });
@@ -98,7 +98,7 @@ export async function unsetFeaturedGalleryItem(id: string) {
   if (!hasPermission(profile, "gallery")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/gallery-items/${encodeURIComponent(id)}/featured`,
+    path: `/api/admin/gallery-items/${encodeURIComponent(id)}/featured`,
     method: "DELETE",
   });
   revalidatePath("/admin/gallery");

@@ -5,7 +5,7 @@ import { ChamberThreeClient } from "./chamber-three-client";
 
 const ChamberThree = async () => {
     const content = await getSiteContent();
-    const data = await fetchServerData<ChamberContent[]>("/api/v1/public/chambers/iii/content");
+    const data = await fetchServerData<ChamberContent[]>("/api/public/chambers/iii/content");
 
     return <ChamberThreeClient content={content} chamberContent={data ?? []} />;
 };

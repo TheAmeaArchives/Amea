@@ -16,7 +16,7 @@ export async function createBlogPost(formData: FormData) {
   const published = formData.get("published") === "true";
 
   await requestServerData({
-    path: "/api/v1/admin/blog-posts",
+    path: "/api/admin/blog-posts",
     method: "POST",
     body: {
       title,
@@ -44,7 +44,7 @@ export async function updateBlogPost(id: string, formData: FormData) {
   const published = formData.get("published") === "true";
 
   await requestServerData({
-    path: `/api/v1/admin/blog-posts/${encodeURIComponent(id)}`,
+    path: `/api/admin/blog-posts/${encodeURIComponent(id)}`,
     method: "PATCH",
     body: {
       title,
@@ -64,7 +64,7 @@ export async function deleteBlogPost(id: string) {
   if (!hasPermission(profile, "blog")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/blog-posts/${encodeURIComponent(id)}`,
+    path: `/api/admin/blog-posts/${encodeURIComponent(id)}`,
     method: "DELETE",
   });
   revalidatePath("/admin/blog");
@@ -76,7 +76,7 @@ export async function toggleBlogPostPublished(id: string, published: boolean) {
   if (!hasPermission(profile, "blog")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/blog-posts/${encodeURIComponent(id)}/published`,
+    path: `/api/admin/blog-posts/${encodeURIComponent(id)}/published`,
     method: "PATCH",
     body: { published },
   });

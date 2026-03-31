@@ -16,7 +16,7 @@ export async function createAdmin(formData: FormData) {
   const permissions: Permission[] = permissionsRaw ? JSON.parse(permissionsRaw) : [];
 
   await requestServerData({
-    path: "/api/v1/admin/admin-profiles",
+    path: "/api/admin/admin-profiles",
     method: "POST",
     body: {
       email,
@@ -41,7 +41,7 @@ export async function updateAdmin(id: string, formData: FormData) {
   const isActive = formData.get("is_active") === "true";
 
   await requestServerData({
-    path: `/api/v1/admin/admin-profiles/${encodeURIComponent(id)}`,
+    path: `/api/admin/admin-profiles/${encodeURIComponent(id)}`,
     method: "PATCH",
     body: {
       full_name: fullName,
@@ -60,7 +60,7 @@ export async function toggleAdminActive(id: string, isActive: boolean) {
   if (id === profile!.id) throw new Error("Cannot deactivate yourself");
 
   await requestServerData({
-    path: `/api/v1/admin/admin-profiles/${encodeURIComponent(id)}/active`,
+    path: `/api/admin/admin-profiles/${encodeURIComponent(id)}/active`,
     method: "PATCH",
     body: { is_active: isActive },
   });

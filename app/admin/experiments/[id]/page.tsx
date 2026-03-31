@@ -14,7 +14,7 @@ export default async function EditExperimentPage({
   if (!profile || !hasPermission(profile, "experiments")) redirect("/admin");
 
   const experiment = await fetchServerData<Experiment>(
-    `/api/v1/admin/experiments/${encodeURIComponent(params.id)}`
+    `/api/admin/experiments/${encodeURIComponent(params.id)}`
   );
 
   if (!experiment) notFound();

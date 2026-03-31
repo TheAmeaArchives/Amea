@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { Router, type Request } from "express";
 import { z } from "zod";
 import { db } from "../db/index.js";
@@ -12,6 +12,7 @@ import {
   contributors,
   experiments,
   galleryItems,
+  memberProfiles,
   programs,
   siteContentEntries,
   supporters,
@@ -218,13 +219,37 @@ publicRouter.get("/contributors/:id", async (req, res) => {
 publicRouter.get("/team", async (_req, res) => {
   const [team, collaborators, latestContributors, supporterRows] = await Promise.all([
     db
-      .select()
+      .select({
+        id: teamMembers.id,
+        member_profile_id: teamMembers.memberProfileId,
+        name: teamMembers.name,
+        role: teamMembers.role,
+        bio: sql<string | null>`coalesce(${memberProfiles.bio}, ${teamMembers.bio})`,
+        image_url: sql<string | null>`coalesce(${memberProfiles.imageUrl}, ${teamMembers.imageUrl})`,
+        member_type: teamMembers.memberType,
+        order_index: teamMembers.orderIndex,
+        created_at: teamMembers.createdAt,
+        updated_at: teamMembers.updatedAt,
+      })
       .from(teamMembers)
+      .leftJoin(memberProfiles, eq(teamMembers.memberProfileId, memberProfiles.id))
       .where(eq(teamMembers.memberType, "team"))
       .orderBy(asc(teamMembers.orderIndex)),
     db
-      .select()
+      .select({
+        id: teamMembers.id,
+        member_profile_id: teamMembers.memberProfileId,
+        name: teamMembers.name,
+        role: teamMembers.role,
+        bio: sql<string | null>`coalesce(${memberProfiles.bio}, ${teamMembers.bio})`,
+        image_url: sql<string | null>`coalesce(${memberProfiles.imageUrl}, ${teamMembers.imageUrl})`,
+        member_type: teamMembers.memberType,
+        order_index: teamMembers.orderIndex,
+        created_at: teamMembers.createdAt,
+        updated_at: teamMembers.updatedAt,
+      })
       .from(teamMembers)
+      .leftJoin(memberProfiles, eq(teamMembers.memberProfileId, memberProfiles.id))
       .where(eq(teamMembers.memberType, "collaborator"))
       .orderBy(asc(teamMembers.orderIndex)),
     db.select().from(contributors).orderBy(desc(contributors.createdAt)).limit(6),

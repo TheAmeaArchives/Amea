@@ -8,12 +8,14 @@ interface ImageUploadProps {
   value: string | null;
   onChange: (url: string | null) => void;
   folder?: string;
+  uploadEndpoint?: string;
 }
 
 export default function ImageUpload({
   value,
   onChange,
   folder = "uploads",
+  uploadEndpoint = "/api/admin/uploads/image",
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +33,7 @@ export default function ImageUpload({
       formData.set("file", file);
       formData.set("folder", folder);
 
-      const response = await fetch("/api/admin/uploads/image", {
+      const response = await fetch(uploadEndpoint, {
         method: "POST",
         body: formData,
       });

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import type { TeamMember, Contributor } from "@/lib/types";
+import { Plus, Pencil, Trash2, Mail, Ban } from "lucide-react";
+import type { TeamMember, Contributor, MemberInvite } from "@/lib/types";
 import { toast } from "@/lib/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,13 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ImageUpload from "@/components/admin/image-upload";
 import {
@@ -33,14 +40,17 @@ import {
   updateTeamMember,
   deleteTeamMember,
   createContributor,
+  createMemberInvite,
   updateContributor,
   deleteContributor,
+  revokeMemberInvite,
 } from "@/app/admin/actions/team";
 
 interface TeamClientProps {
   teamMembers: TeamMember[];
   collaborators: TeamMember[];
   contributors: Contributor[];
+  memberInvites: MemberInvite[];
 }
 
 interface MemberFormState {
@@ -58,6 +68,13 @@ interface ContributorFormState {
   image_url: string | null;
 }
 
+interface MemberInviteFormState {
+  full_name: string;
+  role: string;
+  email: string;
+  expires_in_days: string;
+}
+
 const defaultMemberForm: MemberFormState = {
   name: "",
   role: "",
@@ -73,10 +90,18 @@ const defaultContributorForm: ContributorFormState = {
   image_url: null,
 };
 
+const defaultMemberInviteForm: MemberInviteFormState = {
+  full_name: "",
+  role: "",
+  email: "",
+  expires_in_days: "7",
+};
+
 export default function TeamClient({
   teamMembers,
   collaborators,
   contributors,
+  memberInvites,
 }: TeamClientProps) {
   const router = useRouter();
 
@@ -99,6 +124,10 @@ export default function TeamClient({
     defaultContributorForm
   );
   const [contribLoading, setContribLoading] = useState(false);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [inviteForm, setInviteForm] = useState<MemberInviteFormState>(defaultMemberInviteForm);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [revokingInviteId, setRevokingInviteId] = useState<string | null>(null);
 
   function openCreateMember(type: "team" | "collaborator") {
     const form = { ...defaultMemberForm };
@@ -252,6 +281,57 @@ export default function TeamClient({
         description: err.message,
         variant: "destructive",
       });
+    }
+  }
+
+  function openInviteDialog() {
+    setInviteForm({ ...defaultMemberInviteForm });
+    setInviteDialogOpen(true);
+  }
+
+  async function handleInviteSubmit() {
+    if (!inviteForm.full_name.trim() || !inviteForm.role.trim() || !inviteForm.email.trim()) {
+      toast({ title: "Name, role, and email are required", variant: "destructive" });
+      return;
+    }
+
+    setInviteLoading(true);
+    try {
+      const fd = new FormData();
+      fd.set("full_name", inviteForm.full_name);
+      fd.set("role", inviteForm.role);
+      fd.set("email", inviteForm.email);
+      fd.set("member_type", "team");
+      fd.set("expires_in_days", inviteForm.expires_in_days);
+      await createMemberInvite(fd);
+      toast({ title: "Invite sent" });
+      setInviteDialogOpen(false);
+      router.refresh();
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setInviteLoading(false);
+    }
+  }
+
+  async function handleRevokeInvite(invite: MemberInvite) {
+    setRevokingInviteId(invite.id);
+    try {
+      await revokeMemberInvite(invite.id);
+      toast({ title: "Invite revoked" });
+      router.refresh();
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
+    } finally {
+      setRevokingInviteId(null);
     }
   }
 
@@ -418,8 +498,16 @@ export default function TeamClient({
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Team & Contributors</h1>
         <p className="text-muted-foreground mt-1">
-          Manage team members, collaborators, and contributors.
+          Manage team members, collaborators, contributors, and invited people profiles.
         </p>
+      </div>
+
+      <div className="rounded-md border bg-white p-4">
+        <p className="text-sm font-medium text-foreground">Platform member invites</p>
+        <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+          <p>Invite team members into the platform with only a name, role, and email.</p>
+          <p>After joining, they manage their own username, profile picture, and bio.</p>
+        </div>
       </div>
 
       <Tabs defaultValue="team">
@@ -437,11 +525,45 @@ export default function TeamClient({
 
         {/* Team Members Tab */}
         <TabsContent value="team" className="space-y-4">
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={openInviteDialog}>
+              <Mail className="h-4 w-4 mr-2" />
+              Invite Team Member
+            </Button>
             <Button onClick={() => openCreateMember("team")}>
               <Plus className="h-4 w-4 mr-2" />
               Add Team Member
             </Button>
+          </div>
+          <div className="rounded-md border bg-white p-4">
+            <p className="font-medium">Pending Team Invites</p>
+            <div className="mt-4 space-y-3">
+              {memberInvites.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No team invites yet.</p>
+              ) : (
+                memberInvites.map((invite) => (
+                  <div key={invite.id} className="flex items-center justify-between rounded-md border p-3">
+                    <div>
+                      <p className="font-medium">{invite.full_name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {invite.email} · {invite.role} · {invite.status}
+                      </p>
+                    </div>
+                    {invite.status === "pending" ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRevokeInvite(invite)}
+                        disabled={revokingInviteId === invite.id}
+                      >
+                        <Ban className="h-4 w-4 mr-2" />
+                        Revoke
+                      </Button>
+                    ) : null}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
           <div className="rounded-md border bg-white">
             {renderMemberTable(teamMembers, "team")}
@@ -637,6 +759,71 @@ export default function TeamClient({
           </Dialog>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Invite Team Member</DialogTitle>
+            <DialogDescription>
+              Send an invite email. The recipient will create their member profile after joining.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="invite-name">Name</Label>
+              <Input
+                id="invite-name"
+                value={inviteForm.full_name}
+                onChange={(e) => setInviteForm({ ...inviteForm, full_name: e.target.value })}
+                placeholder="Jane Doe"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-role">Role</Label>
+              <Input
+                id="invite-role"
+                value={inviteForm.role}
+                onChange={(e) => setInviteForm({ ...inviteForm, role: e.target.value })}
+                placeholder="Research Lead"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-email">Email</Label>
+              <Input
+                id="invite-email"
+                type="email"
+                value={inviteForm.email}
+                onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+                placeholder="jane@example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Invite expiry</Label>
+              <Select
+                value={inviteForm.expires_in_days}
+                onValueChange={(value) => setInviteForm({ ...inviteForm, expires_in_days: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">3 days</SelectItem>
+                  <SelectItem value="7">7 days</SelectItem>
+                  <SelectItem value="14">14 days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInviteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleInviteSubmit} disabled={inviteLoading}>
+              {inviteLoading ? "Sending..." : "Send Invite"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

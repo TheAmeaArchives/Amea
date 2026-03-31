@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation";
 import { fetchServerData } from "@/lib/backend/server-api";
 import { getAdminProfile, isSuperAdmin } from "@/lib/admin";
-import type { AdminProfile } from "@/lib/types";
+import type { AdminInvite, AdminProfile } from "@/lib/types";
 import AdminsClient from "./admins-client";
 
 export default async function AdminsPage() {
-  const [profile, data] = await Promise.all([
+  const [profile, admins, invites] = await Promise.all([
     getAdminProfile(),
     fetchServerData<AdminProfile[]>("/api/admin/admin-profiles"),
+    fetchServerData<AdminInvite[]>("/api/admin/admin-invites"),
   ]);
 
   if (!profile || !isSuperAdmin(profile)) {
@@ -16,7 +17,8 @@ export default async function AdminsPage() {
 
   return (
     <AdminsClient
-      admins={data ?? []}
+      admins={admins ?? []}
+      invites={invites ?? []}
       currentUserId={profile.id}
     />
   );

@@ -50,6 +50,23 @@ export interface AdminProfile {
   updated_at: string;
 }
 
+export interface AdminInvite {
+  id: string;
+  email: string;
+  full_name: string;
+  role: AdminRole;
+  permissions: Permission[];
+  invited_by_id: string;
+  accepted_by_id: string | null;
+  expires_at: string;
+  accepted_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+  updated_at: string;
+  status: "pending" | "accepted" | "revoked" | "expired";
+  invitee_email?: string;
+}
+
 export interface BlogPost {
   id: string;
   title: string;
@@ -80,6 +97,7 @@ export interface Experiment {
 
 export interface TeamMember {
   id: string;
+  member_profile_id?: string | null;
   name: string;
   role: string | null;
   bio: string | null;
@@ -98,6 +116,36 @@ export interface Contributor {
   image_url: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface MemberProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  username: string;
+  bio: string | null;
+  image_url: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MemberInvite {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  member_type: "team" | "collaborator";
+  invited_by_id: string;
+  accepted_by_id: string | null;
+  linked_team_member_id: string | null;
+  expires_at: string;
+  accepted_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+  updated_at: string;
+  status: "pending" | "accepted" | "revoked" | "expired";
+  invitee_email?: string;
 }
 
 export interface ContributorArticle {

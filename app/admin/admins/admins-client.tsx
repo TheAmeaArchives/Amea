@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Power } from "lucide-react";
-import type { AdminProfile, AdminRole, Permission } from "@/lib/types";
+import { Plus, Pencil, Power, Mail, Ban } from "lucide-react";
+import type { AdminInvite, AdminProfile, AdminRole, Permission } from "@/lib/types";
 import { ALL_PERMISSIONS, PERMISSION_LABELS } from "@/lib/types";
 import { toast } from "@/lib/use-toast";
 import { Button } from "@/components/ui/button";
@@ -34,13 +34,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  createAdmin,
+  createAdminInvite,
+  revokeAdminInvite,
   updateAdmin,
   toggleAdminActive,
 } from "@/app/admin/actions/admins";
 
 interface AdminsClientProps {
   admins: AdminProfile[];
+  invites: AdminInvite[];
   currentUserId: string;
 }
 
@@ -49,6 +51,7 @@ interface CreateFormState {
   full_name: string;
   role: AdminRole;
   permissions: Permission[];
+  expires_in_days: string;
 }
 
 interface EditFormState {
@@ -63,6 +66,7 @@ const defaultCreateForm: CreateFormState = {
   full_name: "",
   role: "admin",
   permissions: [],
+  expires_in_days: "7",
 };
 
 const defaultEditForm: EditFormState = {
@@ -74,6 +78,7 @@ const defaultEditForm: EditFormState = {
 
 export default function AdminsClient({
   admins,
+  invites,
   currentUserId,
 }: AdminsClientProps) {
   const router = useRouter();
@@ -88,6 +93,7 @@ export default function AdminsClient({
   const [saving, setSaving] = useState(false);
 
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [revokingInviteId, setRevokingInviteId] = useState<string | null>(null);
 
   function openCreate() {
     setCreateForm({ ...defaultCreateForm });
@@ -139,9 +145,10 @@ export default function AdminsClient({
         "permissions",
         JSON.stringify(createForm.role === "super_admin" ? [] : createForm.permissions)
       );
+      fd.set("expires_in_days", createForm.expires_in_days);
 
-      await createAdmin(fd);
-      toast({ title: "Admin created successfully" });
+      await createAdminInvite(fd);
+      toast({ title: "Invite sent successfully" });
       setCreateOpen(false);
       router.refresh();
     } catch (err: any) {
@@ -194,6 +201,19 @@ export default function AdminsClient({
     }
   }
 
+  async function handleRevokeInvite(invite: AdminInvite) {
+    setRevokingInviteId(invite.id);
+    try {
+      await revokeAdminInvite(invite.id);
+      toast({ title: "Invite revoked" });
+      router.refresh();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setRevokingInviteId(null);
+    }
+  }
+
   function PermissionsCheckboxes({
     selected,
     onToggle,
@@ -238,13 +258,79 @@ export default function AdminsClient({
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Admin Accounts</h1>
           <p className="text-muted-foreground mt-1">
-            Manage admin users, roles, and permissions.
+            Manage live admin users, pending invites, roles, and permissions.
           </p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Admin
+          Invite Admin
         </Button>
+      </div>
+
+      <div className="rounded-md border bg-white p-4">
+        <p className="text-sm font-medium text-foreground">How admin access works</p>
+        <div className="mt-2 space-y-1 text-sm text-muted-foreground">
+          <p>The first successful sign-in on a fresh system is bootstrapped as a Super Admin.</p>
+          <p>Super Admins can invite additional people and set each invite to either Admin or Super Admin.</p>
+          <p>Roles remain editable later, and Super Admins automatically have all permissions.</p>
+          <p>Invited users sign in with their invited email and accept the invite link to join.</p>
+        </div>
+      </div>
+
+      <div className="rounded-md border bg-white">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Invitee</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Expires</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-28 text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {invites.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                  No admin invites yet.
+                </TableCell>
+              </TableRow>
+            ) : (
+              invites.map((invite) => (
+                <TableRow key={invite.id}>
+                  <TableCell>
+                    <div className="font-medium">{invite.full_name}</div>
+                    <div className="text-sm text-muted-foreground">{invite.email}</div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={invite.role === "super_admin" ? "default" : "secondary"}>
+                      {invite.role === "super_admin" ? "Super Admin" : "Admin"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{new Date(invite.expires_at).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="capitalize">
+                      {invite.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {invite.status === "pending" ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRevokeInvite(invite)}
+                        disabled={revokingInviteId === invite.id}
+                      >
+                        <Ban className="h-4 w-4 mr-2" />
+                        Revoke
+                      </Button>
+                    ) : null}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </div>
 
       <div className="rounded-md border bg-white">
@@ -266,7 +352,7 @@ export default function AdminsClient({
                   colSpan={6}
                   className="text-center text-muted-foreground py-8"
                 >
-                  No admin accounts found
+                  No admin accounts found yet. The first successful sign-in will be promoted to Super Admin automatically unless there is already a pending invite flow in progress.
                 </TableCell>
               </TableRow>
             ) : (
@@ -352,9 +438,9 @@ export default function AdminsClient({
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Add Admin</DialogTitle>
+            <DialogTitle>Invite Admin</DialogTitle>
             <DialogDescription>
-              Create a new admin account with specific permissions.
+              Send an email invite. The recipient will sign in with the invited email and accept the invite to join.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
@@ -397,6 +483,27 @@ export default function AdminsClient({
                   <SelectItem value="super_admin">Super Admin</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                Admins get only the permissions you select. Super Admins always have full access.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Invite expiry</Label>
+              <Select
+                value={createForm.expires_in_days}
+                onValueChange={(val) =>
+                  setCreateForm({ ...createForm, expires_in_days: val })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">3 days</SelectItem>
+                  <SelectItem value="7">7 days</SelectItem>
+                  <SelectItem value="14">14 days</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <PermissionsCheckboxes
               selected={createForm.permissions}
@@ -409,7 +516,8 @@ export default function AdminsClient({
               Cancel
             </Button>
             <Button onClick={handleCreate} disabled={creating}>
-              {creating ? "Creating..." : "Create Admin"}
+              <Mail className="h-4 w-4 mr-2" />
+              {creating ? "Sending..." : "Send Invite"}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -421,7 +529,7 @@ export default function AdminsClient({
           <DialogHeader>
             <DialogTitle>Edit Admin</DialogTitle>
             <DialogDescription>
-              Update admin details for {editingAdmin?.email}.
+              Update admin details, role, and permissions for {editingAdmin?.email}.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
@@ -451,6 +559,9 @@ export default function AdminsClient({
                   <SelectItem value="super_admin">Super Admin</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                Switching to Super Admin grants full access and makes individual permissions unnecessary.
+              </p>
             </div>
             <PermissionsCheckboxes
               selected={editForm.permissions}

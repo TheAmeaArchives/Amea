@@ -5,7 +5,7 @@ import { getAdminProfile, isSuperAdmin } from "@/lib/admin";
 import { revalidatePath } from "next/cache";
 import type { Permission } from "@/lib/types";
 
-export async function createAdmin(formData: FormData) {
+export async function createAdminInvite(formData: FormData) {
   const profile = await getAdminProfile();
   if (!isSuperAdmin(profile)) throw new Error("Unauthorized");
 
@@ -14,16 +14,17 @@ export async function createAdmin(formData: FormData) {
   const role = formData.get("role") as "admin" | "super_admin";
   const permissionsRaw = formData.get("permissions") as string;
   const permissions: Permission[] = permissionsRaw ? JSON.parse(permissionsRaw) : [];
+  const expiresInDays = Number(formData.get("expires_in_days") as string) || 7;
 
   await requestServerData({
-    path: "/api/admin/admin-profiles",
+    path: "/api/admin/admin-invites",
     method: "POST",
     body: {
       email,
       full_name: fullName,
       role,
       permissions: role === "super_admin" ? [] : permissions,
-      is_active: true,
+      expires_in_days: expiresInDays,
     },
   });
 
@@ -64,5 +65,17 @@ export async function toggleAdminActive(id: string, isActive: boolean) {
     method: "PATCH",
     body: { is_active: isActive },
   });
+  revalidatePath("/admin/admins");
+}
+
+export async function revokeAdminInvite(id: string) {
+  const profile = await getAdminProfile();
+  if (!isSuperAdmin(profile)) throw new Error("Unauthorized");
+
+  await requestServerData({
+    path: `/api/admin/admin-invites/${encodeURIComponent(id)}/revoke`,
+    method: "POST",
+  });
+
   revalidatePath("/admin/admins");
 }

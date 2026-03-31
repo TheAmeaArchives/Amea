@@ -103,3 +103,34 @@ export async function deleteContributor(id: string) {
   revalidatePath("/admin/team");
   revalidatePath("/contributors");
 }
+
+export async function createMemberInvite(formData: FormData) {
+  const profile = await getAdminProfile();
+  if (!hasPermission(profile, "team")) throw new Error("Unauthorized");
+
+  await requestServerData({
+    path: "/api/admin/member-invites",
+    method: "POST",
+    body: {
+      email: formData.get("email") as string,
+      full_name: formData.get("full_name") as string,
+      role: formData.get("role") as string,
+      member_type: (formData.get("member_type") as string) || "team",
+      expires_in_days: parseInt((formData.get("expires_in_days") as string) || "7", 10) || 7,
+    },
+  });
+
+  revalidatePath("/admin/team");
+}
+
+export async function revokeMemberInvite(id: string) {
+  const profile = await getAdminProfile();
+  if (!hasPermission(profile, "team")) throw new Error("Unauthorized");
+
+  await requestServerData({
+    path: `/api/admin/member-invites/${encodeURIComponent(id)}/revoke`,
+    method: "POST",
+  });
+
+  revalidatePath("/admin/team");
+}

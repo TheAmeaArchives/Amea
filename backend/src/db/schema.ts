@@ -112,6 +112,84 @@ export const adminProfiles = pgTable("admin_profiles", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const adminInvites = pgTable(
+  "admin_invites",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    email: text("email").notNull(),
+    fullName: text("full_name").notNull(),
+    role: text("role").notNull(),
+    permissions: text("permissions").array().notNull().default(sql`'{}'::text[]`),
+    tokenHash: text("token_hash").notNull(),
+    invitedById: text("invited_by_id")
+      .notNull()
+      .references(() => adminProfiles.id, { onDelete: "cascade" }),
+    acceptedById: text("accepted_by_id").references(() => user.id, { onDelete: "set null" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    tokenHashUniqueIdx: uniqueIndex("admin_invites_token_hash_unique").on(table.tokenHash),
+    emailIdx: index("idx_admin_invites_email").on(table.email),
+    invitedByIdx: index("idx_admin_invites_invited_by").on(table.invitedById),
+    acceptedByIdx: index("idx_admin_invites_accepted_by").on(table.acceptedById),
+  }),
+);
+
+export const memberProfiles = pgTable(
+  "member_profiles",
+  {
+    id: text("id")
+      .primaryKey()
+      .references(() => user.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    fullName: text("full_name").notNull(),
+    username: text("username").notNull(),
+    bio: text("bio"),
+    imageUrl: text("image_url"),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    usernameUniqueIdx: uniqueIndex("member_profiles_username_unique").on(table.username),
+    emailIdx: index("idx_member_profiles_email").on(table.email),
+  }),
+);
+
+export const memberInvites = pgTable(
+  "member_invites",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    email: text("email").notNull(),
+    fullName: text("full_name").notNull(),
+    role: text("role").notNull(),
+    memberType: text("member_type").notNull().default("team"),
+    tokenHash: text("token_hash").notNull(),
+    invitedById: text("invited_by_id")
+      .notNull()
+      .references(() => adminProfiles.id, { onDelete: "cascade" }),
+    acceptedById: text("accepted_by_id").references(() => user.id, { onDelete: "set null" }),
+    linkedTeamMemberId: uuid("linked_team_member_id").references(() => teamMembers.id, {
+      onDelete: "set null",
+    }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    tokenHashUniqueIdx: uniqueIndex("member_invites_token_hash_unique").on(table.tokenHash),
+    emailIdx: index("idx_member_invites_email").on(table.email),
+    invitedByIdx: index("idx_member_invites_invited_by").on(table.invitedById),
+    acceptedByIdx: index("idx_member_invites_accepted_by").on(table.acceptedById),
+  }),
+);
+
 export const blogPosts = pgTable(
   "blog_posts",
   {
@@ -158,6 +236,9 @@ export const teamMembers = pgTable(
   "team_members",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    memberProfileId: text("member_profile_id").references(() => memberProfiles.id, {
+      onDelete: "set null",
+    }),
     name: text("name").notNull(),
     role: text("role"),
     bio: text("bio"),
@@ -168,6 +249,7 @@ export const teamMembers = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
+    memberProfileUniqueIdx: uniqueIndex("team_members_member_profile_unique").on(table.memberProfileId),
     memberTypeIdx: index("idx_team_members_type").on(table.memberType),
     orderIdx: index("idx_team_members_order").on(table.orderIndex),
   }),

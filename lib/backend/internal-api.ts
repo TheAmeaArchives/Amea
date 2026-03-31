@@ -13,6 +13,7 @@ type InternalApiRequestOptions = {
   body?: unknown;
   cookieHeader?: string | null;
   forwardedFor?: string | null;
+  forwardedHeaders?: Record<string, string | null | undefined>;
 };
 
 type InternalApiResult = {
@@ -56,6 +57,36 @@ function getInternalApiBaseUrl(): string {
 function getInternalApiToken(): string | undefined {
   const token = process.env.INTERNAL_API_TOKEN?.trim();
   return token && token.length > 0 ? token : undefined;
+}
+
+type ForwardedHeaderInput = {
+  origin?: string | null;
+  referer?: string | null;
+  host?: string | null;
+  proto?: string | null;
+  port?: string | null;
+  userAgent?: string | null;
+};
+
+export function createForwardedHeaders(input: ForwardedHeaderInput): Record<string, string> {
+  const host = input.host?.trim();
+  const proto = input.proto?.trim() || "http";
+  const explicitOrigin = input.origin?.trim();
+  const inferredOrigin = host ? `${proto}://${host}` : undefined;
+  const origin = explicitOrigin && explicitOrigin.length > 0 ? explicitOrigin : inferredOrigin;
+  const referer =
+    input.referer?.trim() && input.referer.trim().length > 0 ? input.referer.trim() : origin;
+
+  const forwardedHeaders: Record<string, string> = {};
+
+  if (origin) forwardedHeaders.origin = origin;
+  if (referer) forwardedHeaders.referer = referer;
+  if (input.userAgent?.trim()) forwardedHeaders["user-agent"] = input.userAgent.trim();
+  if (host) forwardedHeaders["x-forwarded-host"] = host;
+  if (proto) forwardedHeaders["x-forwarded-proto"] = proto;
+  if (input.port?.trim()) forwardedHeaders["x-forwarded-port"] = input.port.trim();
+
+  return forwardedHeaders;
 }
 
 function getDefaultErrorMessage(status: number): string {
@@ -216,6 +247,16 @@ export async function requestInternalApi(options: InternalApiRequestOptions): Pr
 
   if (options.forwardedFor && options.forwardedFor.length > 0) {
     headers.set("x-forwarded-for", options.forwardedFor);
+  }
+
+  if (options.forwardedHeaders) {
+    for (const [key, value] of Object.entries(options.forwardedHeaders)) {
+      if (!value || value.length === 0) {
+        continue;
+      }
+
+      headers.set(key, value);
+    }
   }
 
   const internalApiToken = getInternalApiToken();

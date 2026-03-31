@@ -1,9 +1,9 @@
 import { cache } from "react";
-import { fetchServerData } from "@/lib/backend/server-api";
+import { getCurrentAdminProfile } from "@/lib/auth/server";
 import type { AdminProfile, Permission } from "@/lib/types";
 
 export const getAdminProfile = cache(async (): Promise<AdminProfile | null> => {
-  return fetchServerData<AdminProfile>("/api/admin/current-admin/profile");
+  return getCurrentAdminProfile();
 });
 
 export function hasPermission(

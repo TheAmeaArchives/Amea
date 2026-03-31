@@ -1,58 +1,144 @@
 import { APIError } from "@better-auth/core/error";
-import { fromNodeHeaders } from "better-auth/node";
+import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
+import { eq, sql } from "drizzle-orm";
 import { Router } from "express";
-import { z } from "zod";
-import { auth, type AuthErrorPayload } from "../auth/index.js";
-import { env } from "../config/env.js";
+import type { NextFunction, Request, Response } from "express";
+import { auth } from "../auth/index.js";
+import { db } from "../db/index.js";
+import { adminInvites, adminProfiles, user } from "../db/schema.js";
 
-type RateLimitState = {
-  count: number;
-  resetAt: number;
-};
-
-const requestLimiter = new Map<string, RateLimitState>();
-
-const requestOTPBodySchema = z.object({
-  email: z.string().email(),
-});
-
-const verifyOTPBodySchema = z.object({
-  email: z.string().email(),
-  otp: z.string().min(4).max(10),
-  name: z.string().trim().min(1).max(128).optional(),
-});
-
-const otpErrorMessages: Record<string, string> = {
-  INVALID_OTP: "The one-time passcode is invalid.",
-  OTP_EXPIRED: "The one-time passcode has expired. Request a new code.",
-  TOO_MANY_ATTEMPTS: "Too many invalid attempts. Request a new code and try again.",
-};
-
-function getRequestKey(ipAddress: string, email: string): string {
-  return `${ipAddress}:${email.toLowerCase()}`;
-}
-
-function isRateLimited(key: string): boolean {
-  const now = Date.now();
-  const current = requestLimiter.get(key);
-
-  if (!current || current.resetAt <= now) {
-    requestLimiter.set(key, {
-      count: 1,
-      resetAt: now + env.AUTH_REQUEST_RATE_LIMIT_WINDOW_SECONDS * 1_000,
-    });
-    return false;
+async function normalizeEmailRecords(email: string): Promise<void> {
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail) {
+    return;
   }
 
-  current.count += 1;
-  return current.count > env.AUTH_REQUEST_RATE_LIMIT_MAX;
+  const [matchedUser] = await db
+    .select({ id: user.id, email: user.email })
+    .from(user)
+    .where(sql`lower(${user.email}) = ${normalizedEmail}`)
+    .limit(1);
+
+  if (matchedUser && matchedUser.email !== normalizedEmail) {
+    await db
+      .update(user)
+      .set({
+        email: normalizedEmail,
+        updatedAt: new Date(),
+      })
+      .where(eq(user.id, matchedUser.id));
+  }
+
+  const [matchedAdminProfile] = await db
+    .select({ id: adminProfiles.id, email: adminProfiles.email })
+    .from(adminProfiles)
+    .where(sql`lower(${adminProfiles.email}) = ${normalizedEmail}`)
+    .limit(1);
+
+  if (matchedAdminProfile && matchedAdminProfile.email !== normalizedEmail) {
+    await db
+      .update(adminProfiles)
+      .set({
+        email: normalizedEmail,
+        updatedAt: new Date(),
+      })
+      .where(eq(adminProfiles.id, matchedAdminProfile.id));
+  }
 }
 
-function setResponseHeadersFromAuth(res: import("express").Response, authResponse: Response): void {
+function normalizeAuthBodyEmails(body: unknown): { email?: string; newEmail?: string } {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return {};
+  }
+
+  const candidate = body as Record<string, unknown>;
+  const normalized: { email?: string; newEmail?: string } = {};
+
+  if (typeof candidate.email === "string") {
+    normalized.email = candidate.email.trim().toLowerCase();
+    candidate.email = normalized.email;
+  }
+
+  if (typeof candidate.newEmail === "string") {
+    normalized.newEmail = candidate.newEmail.trim().toLowerCase();
+    candidate.newEmail = normalized.newEmail;
+  }
+
+  return normalized;
+}
+
+async function bootstrapInitialAdminProfile(email: string): Promise<void> {
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail) {
+    return;
+  }
+
+  await db.transaction(async (tx) => {
+    const [adminCountRow] = await tx
+      .select({ count: sql<number>`count(*)::int` })
+      .from(adminProfiles);
+
+    if ((adminCountRow?.count ?? 0) > 0) {
+      return;
+    }
+
+    const [pendingInviteCountRow] = await tx
+      .select({ count: sql<number>`count(*)::int` })
+      .from(adminInvites)
+      .where(
+        sql`${adminInvites.acceptedAt} is null and ${adminInvites.revokedAt} is null and ${adminInvites.expiresAt} > now()`,
+      );
+
+    if ((pendingInviteCountRow?.count ?? 0) > 0) {
+      return;
+    }
+
+    const [matchedUser] = await tx
+      .select({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        image: user.image,
+      })
+      .from(user)
+      .where(eq(user.email, normalizedEmail))
+      .limit(1);
+
+    if (!matchedUser) {
+      return;
+    }
+
+    await tx
+      .insert(adminProfiles)
+      .values({
+        id: matchedUser.id,
+        email: normalizedEmail,
+        fullName: matchedUser.name || normalizedEmail,
+        role: "super_admin",
+        permissions: [],
+        avatarUrl: matchedUser.image ?? null,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .onConflictDoNothing();
+  });
+}
+
+function setResponseHeadersFromAuth(res: Response, authResponse: globalThis.Response): void {
   const headersWithCookies = authResponse.headers as Headers & {
     getSetCookie?: () => string[];
   };
-  const setCookie = headersWithCookies.getSetCookie?.() ?? [];
+
+  const setCookie =
+    headersWithCookies.getSetCookie?.() ??
+    authResponse.headers
+      .get("set-cookie")
+      ?.split(/,(?=\s*[^;,\s]+=)/g)
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0) ??
+    [];
+
   if (setCookie.length > 0) {
     res.setHeader("set-cookie", setCookie);
   }
@@ -61,216 +147,158 @@ function setResponseHeadersFromAuth(res: import("express").Response, authRespons
   if (cacheControl) {
     res.setHeader("cache-control", cacheControl);
   }
+
+  const contentType = authResponse.headers.get("content-type");
+  if (contentType) {
+    res.setHeader("content-type", contentType);
+  }
 }
 
-async function getErrorPayload(response: Response): Promise<AuthErrorPayload> {
-  try {
-    const payload = (await response.clone().json()) as AuthErrorPayload;
-    if (payload && typeof payload === "object") {
-      return payload;
-    }
-  } catch {
-    // Non-JSON errors are normalized by caller.
-  }
-  return {};
-}
-
-function mapSafeMessage(statusCode: number, code?: string): string {
-  if (code && otpErrorMessages[code]) {
-    return otpErrorMessages[code];
-  }
-
-  if (statusCode === 429) {
-    return "Too many authentication attempts. Please wait and try again.";
-  }
-
-  if (statusCode >= 500) {
-    return "Authentication service is currently unavailable.";
-  }
-
-  return "Authentication request failed.";
-}
-
-async function sendSafeError(res: import("express").Response, response: Response): Promise<void> {
-  const payload = await getErrorPayload(response);
-  const code = payload.code;
-  const message = mapSafeMessage(response.status, code);
-
-  res.status(response.status).json({
-    error: {
-      code: code ?? (response.status === 429 ? "RATE_LIMITED" : "AUTH_ERROR"),
-      message,
-    },
-  });
-}
-
-async function sendGenericError(
-  res: import("express").Response,
-  error: unknown,
-  fallbackStatusCode = 500,
+async function sendAuthResponse(
+  res: Response,
+  authResponse: globalThis.Response,
+  onSuccess?: (payload: unknown) => Promise<void>,
 ): Promise<void> {
+  setResponseHeadersFromAuth(res, authResponse);
+  const responseText = await authResponse.text();
+
+  if (authResponse.ok && onSuccess) {
+    try {
+      const payload = responseText ? (JSON.parse(responseText) as unknown) : null;
+      await onSuccess(payload);
+    } catch {
+      // Ignore parse failures and return the original auth response unchanged.
+    }
+  }
+
+  res.status(authResponse.status).send(responseText);
+}
+
+function sendAuthError(res: Response, error: unknown): void {
   if (error instanceof APIError) {
-    const code = error.body?.code;
-    const message = mapSafeMessage(error.statusCode, code);
-    res.status(error.statusCode).json({
-      error: {
-        code: code ?? "AUTH_ERROR",
-        message,
-      },
+    res.status(error.statusCode).json(error.body ?? { message: error.message });
+    return;
+  }
+
+  if (error instanceof Error) {
+    res.status(500).json({
+      code: "AUTH_ERROR",
+      message: error.message,
     });
     return;
   }
 
-  res.status(fallbackStatusCode).json({
-    error: {
-      code: "AUTH_ERROR",
-      message: mapSafeMessage(fallbackStatusCode),
-    },
+  res.status(500).json({
+    code: "AUTH_ERROR",
+    message: "Authentication request failed.",
   });
 }
 
-function getClientIP(req: import("express").Request): string {
-  const forwardedFor = req.headers["x-forwarded-for"];
-  if (typeof forwardedFor === "string" && forwardedFor.length > 0) {
-    return forwardedFor.split(",")[0]?.trim() || "unknown";
-  }
-  return req.ip || "unknown";
-}
+const authHandler = toNodeHandler(auth);
 
 export const authRouter = Router();
 
-authRouter.post("/otp/request", async (req, res) => {
-  const parsed = requestOTPBodySchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({
-      error: {
-        code: "INVALID_REQUEST",
-        message: "A valid email is required.",
-      },
-    });
-    return;
-  }
-
-  const email = parsed.data.email.toLowerCase();
-  if (isRateLimited(getRequestKey(getClientIP(req), email))) {
-    res.status(429).json({
-      error: {
-        code: "RATE_LIMITED",
-        message: "Too many OTP requests. Please wait and try again.",
-      },
-    });
-    return;
-  }
-
+authRouter.use(async (req: Request, _res: Response, next: NextFunction) => {
   try {
+    if (req.method !== "GET" && req.method !== "HEAD" && req.method !== "OPTIONS") {
+      const { email, newEmail } = normalizeAuthBodyEmails(req.body);
+      if (email) {
+        await normalizeEmailRecords(email);
+      }
+      if (newEmail) {
+        await normalizeEmailRecords(newEmail);
+      }
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+authRouter.post("/email-otp/send-verification-otp", async (req: Request, res: Response) => {
+  try {
+    const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    if (email) {
+      await normalizeEmailRecords(email);
+      req.body.email = email;
+    }
+
     const authResponse = await auth.api.sendVerificationOTP({
       headers: fromNodeHeaders(req.headers),
-      body: {
-        email,
-        type: "sign-in",
-      },
+      body: req.body,
       asResponse: true,
     });
 
-    if (!authResponse.ok) {
-      await sendSafeError(res, authResponse);
-      return;
-    }
-
-    res.status(200).json({ success: true });
-  } catch (error: unknown) {
-    await sendGenericError(res, error);
+    await sendAuthResponse(res, authResponse);
+  } catch (error) {
+    sendAuthError(res, error);
   }
 });
 
-authRouter.post("/otp/verify", async (req, res) => {
-  const parsed = verifyOTPBodySchema.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({
-      error: {
-        code: "INVALID_REQUEST",
-        message: "A valid email and OTP are required.",
-      },
-    });
-    return;
-  }
-
+authRouter.post("/sign-in/email-otp", async (req: Request, res: Response) => {
   try {
+    const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    if (email) {
+      await normalizeEmailRecords(email);
+      req.body.email = email;
+    }
+
     const authResponse = await auth.api.signInEmailOTP({
       headers: fromNodeHeaders(req.headers),
-      body: {
-        email: parsed.data.email.toLowerCase(),
-        otp: parsed.data.otp,
-        name: parsed.data.name,
-      },
+      body: req.body,
       asResponse: true,
     });
 
-    setResponseHeadersFromAuth(res, authResponse);
-
-    if (!authResponse.ok) {
-      await sendSafeError(res, authResponse);
-      return;
-    }
-
-    const payload = (await authResponse.json()) as { user: Record<string, unknown> };
-    res.status(200).json({
-      success: true,
-      user: payload.user,
+    await sendAuthResponse(res, authResponse, async () => {
+      if (email) {
+        await bootstrapInitialAdminProfile(email);
+      }
     });
-  } catch (error: unknown) {
-    await sendGenericError(res, error);
+  } catch (error) {
+    sendAuthError(res, error);
   }
 });
 
-authRouter.get("/session", async (req, res) => {
+authRouter.get("/get-session", async (req: Request, res: Response) => {
   try {
     const authResponse = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
       asResponse: true,
     });
 
-    setResponseHeadersFromAuth(res, authResponse);
-
-    if (!authResponse.ok) {
-      await sendSafeError(res, authResponse);
-      return;
-    }
-
-    const payload = (await authResponse.json()) as
-      | {
-          session: Record<string, unknown>;
-          user: Record<string, unknown>;
-        }
-      | null;
-
-    if (payload?.session && "token" in payload.session) {
-      // Avoid exposing raw session token in API responses.
-      delete payload.session.token;
-    }
-
-    res.status(200).json(payload);
-  } catch (error: unknown) {
-    await sendGenericError(res, error);
+    await sendAuthResponse(res, authResponse);
+  } catch (error) {
+    sendAuthError(res, error);
   }
 });
 
-authRouter.post("/logout", async (req, res) => {
+authRouter.post("/sign-out", async (req: Request, res: Response) => {
   try {
     const authResponse = await auth.api.signOut({
       headers: fromNodeHeaders(req.headers),
       asResponse: true,
     });
 
-    setResponseHeadersFromAuth(res, authResponse);
+    await sendAuthResponse(res, authResponse);
+  } catch (error) {
+    sendAuthError(res, error);
+  }
+});
 
-    if (!authResponse.ok) {
-      await sendSafeError(res, authResponse);
-      return;
-    }
+authRouter.use(async (req: Request, res: Response, next: NextFunction) => {
+  if (
+    req.path === "/email-otp/send-verification-otp" ||
+    req.path === "/sign-in/email-otp" ||
+    req.path === "/get-session" ||
+    req.path === "/sign-out"
+  ) {
+    next();
+    return;
+  }
 
-    res.status(200).json({ success: true });
-  } catch (error: unknown) {
-    await sendGenericError(res, error);
+  try {
+    await authHandler(req, res);
+  } catch (error) {
+    next(error);
   }
 });

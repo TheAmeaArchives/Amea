@@ -5,7 +5,7 @@ import { ContributorsPageClient } from "./contributors-client";
 
 const Contributors = async () => {
     const content = await getSiteContent();
-    const data = await fetchServerData<Contributor[]>("/api/v1/public/contributors");
+    const data = await fetchServerData<Contributor[]>("/api/public/contributors");
 
     return <ContributorsPageClient content={content} contributors={data ?? []} />;
 };

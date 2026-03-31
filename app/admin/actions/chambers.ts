@@ -17,13 +17,13 @@ export async function upsertChamberStat(id: string | null, formData: FormData) {
 
   if (id) {
     await requestServerData({
-      path: `/api/v1/admin/chamber-stats/${encodeURIComponent(id)}`,
+      path: `/api/admin/chamber-stats/${encodeURIComponent(id)}`,
       method: "PATCH",
       body: data,
     });
   } else {
     await requestServerData({
-      path: "/api/v1/admin/chamber-stats",
+      path: "/api/admin/chamber-stats",
       method: "POST",
       body: data,
     });
@@ -38,7 +38,7 @@ export async function deleteChamberStat(id: string) {
   if (!hasPermission(profile, "chambers")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/chamber-stats/${encodeURIComponent(id)}`,
+    path: `/api/admin/chamber-stats/${encodeURIComponent(id)}`,
     method: "DELETE",
   });
   revalidatePath("/admin/chambers");
@@ -58,13 +58,13 @@ export async function upsertChamberBelief(id: string | null, formData: FormData)
 
   if (id) {
     await requestServerData({
-      path: `/api/v1/admin/chamber-beliefs/${encodeURIComponent(id)}`,
+      path: `/api/admin/chamber-beliefs/${encodeURIComponent(id)}`,
       method: "PATCH",
       body: data,
     });
   } else {
     await requestServerData({
-      path: "/api/v1/admin/chamber-beliefs",
+      path: "/api/admin/chamber-beliefs",
       method: "POST",
       body: data,
     });
@@ -79,7 +79,7 @@ export async function deleteChamberBelief(id: string) {
   if (!hasPermission(profile, "chambers")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/chamber-beliefs/${encodeURIComponent(id)}`,
+    path: `/api/admin/chamber-beliefs/${encodeURIComponent(id)}`,
     method: "DELETE",
   });
   revalidatePath("/admin/chambers");
@@ -98,13 +98,13 @@ export async function upsertChamberContent(id: string | null, formData: FormData
 
   if (id) {
     await requestServerData({
-      path: `/api/v1/admin/chamber-content/${encodeURIComponent(id)}`,
+      path: `/api/admin/chamber-content/${encodeURIComponent(id)}`,
       method: "PATCH",
       body: data,
     });
   } else {
     await requestServerData({
-      path: "/api/v1/admin/chamber-content",
+      path: "/api/admin/chamber-content",
       method: "POST",
       body: data,
     });

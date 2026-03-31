@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const sessionResult = await requestInternalApi({
-    path: "/api/v1/auth/session",
+    path: "/api/auth/session",
     method: "GET",
     cookieHeader: request.headers.get("cookie"),
     forwardedFor: request.headers.get("x-forwarded-for"),

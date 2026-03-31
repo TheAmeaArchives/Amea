@@ -7,7 +7,7 @@ import ProgramsClient from "./programs-client";
 export default async function ProgramsAdminPage() {
   const [profile, data] = await Promise.all([
     getAdminProfile(),
-    fetchServerData<Program[]>("/api/v1/admin/programs"),
+    fetchServerData<Program[]>("/api/admin/programs"),
   ]);
 
   if (!profile || !hasPermission(profile, "programs")) {

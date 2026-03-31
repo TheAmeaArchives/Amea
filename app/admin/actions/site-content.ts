@@ -9,7 +9,7 @@ export async function upsertSiteContent(key: string, value: string) {
   if (!hasPermission(profile, "site_content")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/site-content/${encodeURIComponent(key)}`,
+    path: `/api/admin/site-content/${encodeURIComponent(key)}`,
     method: "PUT",
     body: { value },
   });

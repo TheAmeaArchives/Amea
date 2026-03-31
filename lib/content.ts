@@ -2,7 +2,7 @@ import { fetchServerData } from "@/lib/backend/server-api";
 import type { SiteContentMap } from "@/lib/types";
 
 export async function getSiteContent(): Promise<SiteContentMap> {
-  return (await fetchServerData<SiteContentMap>("/api/v1/public/site-content")) ?? {};
+  return (await fetchServerData<SiteContentMap>("/api/public/site-content")) ?? {};
 }
 
 export async function getContentByKeys(keys: string[]): Promise<SiteContentMap> {
@@ -14,7 +14,7 @@ export async function getContentByKeys(keys: string[]): Promise<SiteContentMap> 
     keys: keys.join(","),
   });
 
-  return (await fetchServerData<SiteContentMap>(`/api/v1/public/site-content?${query.toString()}`)) ?? {};
+  return (await fetchServerData<SiteContentMap>(`/api/public/site-content?${query.toString()}`)) ?? {};
 }
 
 export function getContent(contentMap: SiteContentMap, key: string, fallback: string = ""): string {

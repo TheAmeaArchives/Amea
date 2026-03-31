@@ -7,7 +7,7 @@ import ContactsClient from "./contacts-client";
 export default async function ContactsAdminPage() {
   const [profile, data] = await Promise.all([
     getAdminProfile(),
-    fetchServerData<ContactSubmission[]>("/api/v1/admin/contact-submissions"),
+    fetchServerData<ContactSubmission[]>("/api/admin/contact-submissions"),
   ]);
 
   if (!profile || !hasPermission(profile, "contacts")) {

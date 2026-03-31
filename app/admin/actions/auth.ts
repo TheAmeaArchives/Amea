@@ -49,7 +49,7 @@ export async function logout() {
   const requestHeaders = headers();
 
   const logoutResult = await requestInternalApi({
-    path: "/api/v1/auth/logout",
+    path: "/api/auth/logout",
     method: "POST",
     cookieHeader: cookieStore.toString(),
     forwardedFor: requestHeaders.get("x-forwarded-for"),

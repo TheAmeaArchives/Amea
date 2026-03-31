@@ -9,7 +9,7 @@ export async function markContactRead(id: string, read: boolean) {
   if (!hasPermission(profile, "contacts")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/contact-submissions/${encodeURIComponent(id)}/read`,
+    path: `/api/admin/contact-submissions/${encodeURIComponent(id)}/read`,
     method: "PATCH",
     body: { read },
   });
@@ -21,7 +21,7 @@ export async function deleteContact(id: string) {
   if (!hasPermission(profile, "contacts")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/contact-submissions/${encodeURIComponent(id)}`,
+    path: `/api/admin/contact-submissions/${encodeURIComponent(id)}`,
     method: "DELETE",
   });
   revalidatePath("/admin/contacts");
@@ -32,7 +32,7 @@ export async function updateVolunteerStatus(id: string, status: string) {
   if (!hasPermission(profile, "volunteers")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/volunteer-submissions/${encodeURIComponent(id)}/status`,
+    path: `/api/admin/volunteer-submissions/${encodeURIComponent(id)}/status`,
     method: "PATCH",
     body: { status },
   });
@@ -44,7 +44,7 @@ export async function deleteVolunteer(id: string) {
   if (!hasPermission(profile, "volunteers")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/volunteer-submissions/${encodeURIComponent(id)}`,
+    path: `/api/admin/volunteer-submissions/${encodeURIComponent(id)}`,
     method: "DELETE",
   });
   revalidatePath("/admin/volunteers");

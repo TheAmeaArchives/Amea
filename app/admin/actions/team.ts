@@ -9,7 +9,7 @@ export async function createTeamMember(formData: FormData) {
   if (!hasPermission(profile, "team")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: "/api/v1/admin/team-members",
+    path: "/api/admin/team-members",
     method: "POST",
     body: {
       name: formData.get("name") as string,
@@ -29,7 +29,7 @@ export async function updateTeamMember(id: string, formData: FormData) {
   if (!hasPermission(profile, "team")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/team-members/${encodeURIComponent(id)}`,
+    path: `/api/admin/team-members/${encodeURIComponent(id)}`,
     method: "PATCH",
     body: {
       name: formData.get("name") as string,
@@ -49,7 +49,7 @@ export async function deleteTeamMember(id: string) {
   if (!hasPermission(profile, "team")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/team-members/${encodeURIComponent(id)}`,
+    path: `/api/admin/team-members/${encodeURIComponent(id)}`,
     method: "DELETE",
   });
   revalidatePath("/admin/team");
@@ -61,7 +61,7 @@ export async function createContributor(formData: FormData) {
   if (!hasPermission(profile, "team")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: "/api/v1/admin/contributors",
+    path: "/api/admin/contributors",
     method: "POST",
     body: {
       name: formData.get("name") as string,
@@ -79,7 +79,7 @@ export async function updateContributor(id: string, formData: FormData) {
   if (!hasPermission(profile, "team")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/contributors/${encodeURIComponent(id)}`,
+    path: `/api/admin/contributors/${encodeURIComponent(id)}`,
     method: "PATCH",
     body: {
       name: formData.get("name") as string,
@@ -97,7 +97,7 @@ export async function deleteContributor(id: string) {
   if (!hasPermission(profile, "team")) throw new Error("Unauthorized");
 
   await requestServerData({
-    path: `/api/v1/admin/contributors/${encodeURIComponent(id)}`,
+    path: `/api/admin/contributors/${encodeURIComponent(id)}`,
     method: "DELETE",
   });
   revalidatePath("/admin/team");

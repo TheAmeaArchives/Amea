@@ -25,8 +25,8 @@ void mkdir(uploadDirectory, { recursive: true });
 app.use("/uploads", express.static(uploadDirectory));
 
 app.use("/health", healthRouter);
-app.use("/api/v1/auth", authRouter);
-app.use("/api/v1", apiRouter);
+app.use("/api/auth", authRouter);
+app.use("/api", apiRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

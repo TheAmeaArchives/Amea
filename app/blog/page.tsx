@@ -6,7 +6,7 @@ import { BlogPageClient } from "./blog-client";
 const Blogs = async () => {
     const content = await getSiteContent();
 
-    const posts = await fetchServerData<BlogPost[]>("/api/v1/public/blog-posts?published=true");
+    const posts = await fetchServerData<BlogPost[]>("/api/public/blog-posts?published=true");
 
     return <BlogPageClient content={content} posts={posts ?? []} />;
 };

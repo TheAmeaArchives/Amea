@@ -11,7 +11,7 @@ export default async function ChambersAdminPage() {
       stats: ChamberStat[];
       beliefs: ChamberBelief[];
       content: ChamberContent[];
-    }>("/api/v1/admin/chambers"),
+    }>("/api/admin/chambers"),
   ]);
 
   if (!profile || !hasPermission(profile, "chambers")) {

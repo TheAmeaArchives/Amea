@@ -8,7 +8,7 @@ const Gallery = async () => {
   const payload = await fetchServerData<{
     items: GalleryItem[];
     featured_item: GalleryItem | null;
-  }>("/api/v1/public/gallery");
+  }>("/api/public/gallery");
   const items = payload?.items ?? [];
   const featuredItem = payload?.featured_item ?? null;
 

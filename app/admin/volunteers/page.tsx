@@ -7,7 +7,7 @@ import VolunteersClient from "./volunteers-client";
 export default async function VolunteersAdminPage() {
   const [profile, data] = await Promise.all([
     getAdminProfile(),
-    fetchServerData<VolunteerSubmission[]>("/api/v1/admin/volunteer-submissions"),
+    fetchServerData<VolunteerSubmission[]>("/api/admin/volunteer-submissions"),
   ]);
 
   if (!profile || !hasPermission(profile, "volunteers")) {

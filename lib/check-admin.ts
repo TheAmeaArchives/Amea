@@ -3,7 +3,7 @@ import type { Permission } from "@/lib/types";
 import type { AdminProfile } from "@/lib/types";
 
 async function getCurrentAdminProfile(): Promise<AdminProfile | null> {
-  return fetchServerData<AdminProfile>("/api/v1/admin/current-admin/profile");
+  return fetchServerData<AdminProfile>("/api/admin/current-admin/profile");
 }
 
 export async function checkIsAdmin(): Promise<boolean> {

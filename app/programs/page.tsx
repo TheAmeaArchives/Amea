@@ -5,7 +5,7 @@ import { ProgramsPageClient } from "./programs-client";
 
 const Programs = async () => {
     const content = await getSiteContent();
-    const data = await fetchServerData<Program[]>("/api/v1/public/programs");
+    const data = await fetchServerData<Program[]>("/api/public/programs");
 
     return <ProgramsPageClient content={content} programs={data ?? []} />;
 };

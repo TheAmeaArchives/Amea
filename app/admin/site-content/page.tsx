@@ -8,7 +8,7 @@ import SiteContentClient from "./site-content-client";
 export default async function SiteContentAdminPage() {
   const [profile, data] = await Promise.all([
     getAdminProfile(),
-    fetchServerData<SiteContent[]>("/api/v1/admin/site-content"),
+    fetchServerData<SiteContent[]>("/api/admin/site-content"),
   ]);
 
   if (!profile || !hasPermission(profile, "site_content")) {

@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 
 const ExperimentsPage = async ({ params }: { params: { slug: string } }) => {
     const post = await fetchServerData<Experiment>(
-        `/api/v1/public/experiments/${encodeURIComponent(params.slug)}`
+        `/api/public/experiments/${encodeURIComponent(params.slug)}`
     );
 
     if (!post) {

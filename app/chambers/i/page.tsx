@@ -7,7 +7,7 @@ const ChamberOne = async () => {
     const content = await getSiteContent();
 
     const experiments = await fetchServerData<Experiment[]>(
-        "/api/v1/public/experiments?published=true&chamber=i"
+        "/api/public/experiments?published=true&chamber=i"
     );
 
     return <ChamberOneClient content={content} experiments={experiments ?? []} />;

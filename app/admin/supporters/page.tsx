@@ -7,7 +7,7 @@ import SupportersClient from "./supporters-client";
 export default async function SupportersAdminPage() {
   const [profile, data] = await Promise.all([
     getAdminProfile(),
-    fetchServerData<Supporter[]>("/api/v1/admin/supporters"),
+    fetchServerData<Supporter[]>("/api/admin/supporters"),
   ]);
 
   if (!profile || !hasPermission(profile, "supporters")) {

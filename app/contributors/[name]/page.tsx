@@ -10,7 +10,7 @@ const IndividualContributorPage = async ({ params }: { params: { name: string } 
     const payload = await fetchServerData<{
         contributor: Contributor;
         articles: ContributorArticle[];
-    }>(`/api/v1/public/contributors/${encodeURIComponent(name)}`);
+    }>(`/api/public/contributors/${encodeURIComponent(name)}`);
     const contributor = payload?.contributor ?? null;
 
     if (!contributor) {

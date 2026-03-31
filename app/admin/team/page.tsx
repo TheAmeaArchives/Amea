@@ -7,9 +7,9 @@ import TeamClient from "./team-client";
 export default async function TeamAdminPage() {
   const [profile, teamRes, collabRes, contribRes] = await Promise.all([
     getAdminProfile(),
-    fetchServerData<TeamMember[]>("/api/v1/admin/team-members?member_type=team"),
-    fetchServerData<TeamMember[]>("/api/v1/admin/team-members?member_type=collaborator"),
-    fetchServerData<Contributor[]>("/api/v1/admin/contributors"),
+    fetchServerData<TeamMember[]>("/api/admin/team-members?member_type=team"),
+    fetchServerData<TeamMember[]>("/api/admin/team-members?member_type=collaborator"),
+    fetchServerData<Contributor[]>("/api/admin/contributors"),
   ]);
 
   if (!profile || !hasPermission(profile, "team")) {

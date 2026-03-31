@@ -1,7 +1,7 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { and, asc, desc, eq, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, ne, or, sql } from "drizzle-orm";
 import type { Request } from "express";
 import { Router } from "express";
 import multer, { MulterError } from "multer";
@@ -9,6 +9,7 @@ import { z } from "zod";
 import { env } from "../config/env.js";
 import { db } from "../db/index.js";
 import {
+  adminInvites,
   adminProfiles,
   blogPosts,
   chamberBeliefs,
@@ -18,6 +19,8 @@ import {
   contributors,
   experiments,
   galleryItems,
+  memberInvites,
+  memberProfiles,
   programs,
   siteContentEntries,
   supporters,
@@ -25,6 +28,9 @@ import {
   user,
   volunteerSubmissions,
 } from "../db/schema.js";
+import { auth } from "../auth/index.js";
+import { fromNodeHeaders } from "better-auth/node";
+import { sendTransactionalEmail } from "../email/transactional.js";
 import {
   adminPermissions,
   requireAnyAdminPermission,
@@ -34,6 +40,7 @@ import {
   requireSuperAdmin,
   type AuthenticatedRequest,
 } from "../middleware/admin-auth.js";
+import { isS3StorageConfigured, uploadImageToS3 } from "../storage/s3.js";
 import { parseInteger, sendData, sendError } from "../utils/http.js";
 
 const upload = multer({
@@ -74,6 +81,22 @@ const adminProfileUpdateSchema = z.object({
   permissions: z.array(z.string()).optional(),
   avatar_url: z.string().trim().optional().nullable(),
   is_active: z.boolean().optional(),
+});
+
+const adminInviteSchema = z.object({
+  email: z.string().trim().email(),
+  full_name: z.string().trim().min(1),
+  role: z.enum(["super_admin", "admin"]),
+  permissions: z.array(z.string()).optional(),
+  expires_in_days: z.coerce.number().int().min(1).max(30).optional(),
+});
+
+const memberInviteSchema = z.object({
+  email: z.string().trim().email(),
+  full_name: z.string().trim().min(1),
+  role: z.string().trim().min(1),
+  member_type: z.enum(["team", "collaborator"]).optional(),
+  expires_in_days: z.coerce.number().int().min(1).max(30).optional(),
 });
 
 const activeToggleSchema = z.object({
@@ -212,6 +235,232 @@ function parseOptionalString(value: unknown): string | null {
   return normalized.length > 0 ? normalized : null;
 }
 
+function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function hashInviteToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+function createInviteToken(): string {
+  return randomBytes(32).toString("base64url");
+}
+
+function resolveInviteBaseUrl(): string {
+  if (env.BETTER_AUTH_URL) {
+    const authUrl = new URL(env.BETTER_AUTH_URL);
+    return authUrl.origin;
+  }
+
+  const host = env.HOST === "0.0.0.0" ? "127.0.0.1" : env.HOST;
+  return `http://${host}:3000`;
+}
+
+function buildInviteLink(token: string): string {
+  const baseUrl = resolveInviteBaseUrl().replace(/\/$/, "");
+  return `${baseUrl}/invite/${encodeURIComponent(token)}`;
+}
+
+function buildMemberInviteLink(token: string): string {
+  const baseUrl = resolveInviteBaseUrl().replace(/\/$/, "");
+  return `${baseUrl}/join/${encodeURIComponent(token)}`;
+}
+
+function getInviteStatus(invite: typeof adminInvites.$inferSelect): "pending" | "accepted" | "revoked" | "expired" {
+  if (invite.acceptedAt) return "accepted";
+  if (invite.revokedAt) return "revoked";
+  if (invite.expiresAt.getTime() <= Date.now()) return "expired";
+  return "pending";
+}
+
+function serializeAdminInvite(invite: typeof adminInvites.$inferSelect) {
+  return {
+    id: invite.id,
+    email: invite.email,
+    full_name: invite.fullName,
+    role: invite.role,
+    permissions: invite.permissions,
+    invited_by_id: invite.invitedById,
+    accepted_by_id: invite.acceptedById,
+    expires_at: invite.expiresAt.toISOString(),
+    accepted_at: invite.acceptedAt?.toISOString() ?? null,
+    revoked_at: invite.revokedAt?.toISOString() ?? null,
+    created_at: invite.createdAt.toISOString(),
+    updated_at: invite.updatedAt.toISOString(),
+    status: getInviteStatus(invite),
+  };
+}
+
+function getMemberInviteStatus(invite: typeof memberInvites.$inferSelect): "pending" | "accepted" | "revoked" | "expired" {
+  if (invite.acceptedAt) return "accepted";
+  if (invite.revokedAt) return "revoked";
+  if (invite.expiresAt.getTime() <= Date.now()) return "expired";
+  return "pending";
+}
+
+function serializeMemberInvite(invite: typeof memberInvites.$inferSelect) {
+  return {
+    id: invite.id,
+    email: invite.email,
+    full_name: invite.fullName,
+    role: invite.role,
+    member_type: invite.memberType as "team" | "collaborator",
+    invited_by_id: invite.invitedById,
+    accepted_by_id: invite.acceptedById,
+    linked_team_member_id: invite.linkedTeamMemberId,
+    expires_at: invite.expiresAt.toISOString(),
+    accepted_at: invite.acceptedAt?.toISOString() ?? null,
+    revoked_at: invite.revokedAt?.toISOString() ?? null,
+    created_at: invite.createdAt.toISOString(),
+    updated_at: invite.updatedAt.toISOString(),
+    status: getMemberInviteStatus(invite),
+  };
+}
+
+async function findInviteByToken(token: string): Promise<typeof adminInvites.$inferSelect | null> {
+  const [invite] = await db
+    .select()
+    .from(adminInvites)
+    .where(eq(adminInvites.tokenHash, hashInviteToken(token)))
+    .limit(1);
+
+  return invite ?? null;
+}
+
+async function findMemberInviteByToken(token: string): Promise<typeof memberInvites.$inferSelect | null> {
+  const [invite] = await db
+    .select()
+    .from(memberInvites)
+    .where(eq(memberInvites.tokenHash, hashInviteToken(token)))
+    .limit(1);
+
+  return invite ?? null;
+}
+
+async function ensureInvitedUserExists(input: { email: string; fullName: string }): Promise<void> {
+  const normalizedEmail = normalizeEmail(input.email);
+  const [existingUser] = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(sql`lower(${user.email}) = ${normalizedEmail}`)
+    .limit(1);
+
+  if (existingUser) {
+    return;
+  }
+
+  await db.insert(user).values({
+    id: randomUUID(),
+    name: input.fullName,
+    email: normalizedEmail,
+    emailVerified: false,
+    image: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
+}
+
+function slugifyUsernameSeed(value: string): string {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+  return normalized || "member";
+}
+
+async function generateUniqueMemberUsername(fullName: string, email: string): Promise<string> {
+  const emailSeed = email.split("@")[0] ?? "";
+  const base = slugifyUsernameSeed(fullName || emailSeed || "member");
+
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    const candidate = attempt === 0 ? base : `${base}_${attempt + 1}`;
+    const [existing] = await db
+      .select({ id: memberProfiles.id })
+      .from(memberProfiles)
+      .where(eq(memberProfiles.username, candidate))
+      .limit(1);
+
+    if (!existing) {
+      return candidate;
+    }
+  }
+
+  return `${base}_${randomUUID().slice(0, 8)}`;
+}
+
+async function sendAdminInviteEmail(input: {
+  email: string;
+  fullName: string;
+  role: "super_admin" | "admin";
+  inviteLink: string;
+  expiresAt: Date;
+}): Promise<void> {
+  await sendTransactionalEmail({
+    to: input.email,
+    subject: "You’ve been invited to join the AMEA admin platform",
+    text: [
+      `You’ve been invited to join the AMEA admin platform as a ${input.role === "super_admin" ? "Super Admin" : "Admin"}.`,
+      `Open this link to accept the invite: ${input.inviteLink}`,
+      `This invite expires on ${input.expiresAt.toUTCString()}.`,
+    ].join("\n\n"),
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #111827;">
+        <h2 style="margin: 0 0 12px;">You’ve been invited to join AMEA</h2>
+        <p style="margin: 0 0 12px;">${input.fullName}, you’ve been invited to join the admin platform as a <strong>${input.role === "super_admin" ? "Super Admin" : "Admin"}</strong>.</p>
+        <p style="margin: 0 0 20px;">
+          <a href="${input.inviteLink}" style="display: inline-block; padding: 12px 18px; background: #111827; color: #fff; text-decoration: none; border-radius: 8px;">
+            Accept invite
+          </a>
+        </p>
+        <p style="margin: 0 0 8px;">If the button doesn’t work, open this link:</p>
+        <p style="margin: 0 0 16px; word-break: break-all;">
+          <a href="${input.inviteLink}">${input.inviteLink}</a>
+        </p>
+        <p style="margin: 0; color: #4b5563;">This invite expires on ${input.expiresAt.toUTCString()}.</p>
+      </div>
+    `,
+  });
+}
+
+async function sendMemberInviteEmail(input: {
+  email: string;
+  fullName: string;
+  role: string;
+  inviteLink: string;
+  expiresAt: Date;
+}): Promise<void> {
+  await sendTransactionalEmail({
+    to: input.email,
+    subject: "You’ve been invited to join the AMEA platform",
+    text: [
+      `You’ve been invited to join the AMEA platform as ${input.fullName}.`,
+      `Role: ${input.role}.`,
+      `Open this link to accept the invite: ${input.inviteLink}`,
+      `This invite expires on ${input.expiresAt.toUTCString()}.`,
+    ].join("\n\n"),
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #111827;">
+        <h2 style="margin: 0 0 12px;">You’ve been invited to join AMEA</h2>
+        <p style="margin: 0 0 12px;">${input.fullName}, you’ve been invited to join the platform.</p>
+        <p style="margin: 0 0 12px;">Your team role is <strong>${input.role}</strong>.</p>
+        <p style="margin: 0 0 20px;">
+          <a href="${input.inviteLink}" style="display: inline-block; padding: 12px 18px; background: #111827; color: #fff; text-decoration: none; border-radius: 8px;">
+            Accept invite
+          </a>
+        </p>
+        <p style="margin: 0 0 8px;">If the button doesn’t work, open this link:</p>
+        <p style="margin: 0 0 16px; word-break: break-all;">
+          <a href="${input.inviteLink}">${input.inviteLink}</a>
+        </p>
+        <p style="margin: 0; color: #4b5563;">This invite expires on ${input.expiresAt.toUTCString()}.</p>
+      </div>
+    `,
+  });
+}
+
 function parseUnknownContent(value: unknown): unknown | null {
   if (value === undefined || value === null || value === "") {
     return null;
@@ -337,7 +586,7 @@ function getUploadsRootDir(): string {
   return path.resolve(process.cwd(), env.UPLOAD_DIRECTORY);
 }
 
-async function saveUploadFile(req: Request, file: Express.Multer.File, fallbackFolder: string): Promise<{
+async function saveLocalUploadFile(req: Request, file: Express.Multer.File, fallbackFolder: string): Promise<{
   key: string;
   url: string;
   mimeType: string;
@@ -405,6 +654,261 @@ async function countAll(): Promise<{
 
 export const adminRouter = Router();
 
+adminRouter.get("/public/admin-invites/:token", async (req, res) => {
+  const invite = await findInviteByToken(pathParam(req, "token"));
+  if (!invite) {
+    sendError(res, 404, "NOT_FOUND", "Invite not found.");
+    return;
+  }
+
+  sendData(res, {
+    ...serializeAdminInvite(invite),
+    invitee_email: invite.email,
+  });
+});
+
+adminRouter.post("/public/admin-invites/:token/accept", async (req, res) => {
+  const invite = await findInviteByToken(pathParam(req, "token"));
+  if (!invite) {
+    sendError(res, 404, "NOT_FOUND", "Invite not found.");
+    return;
+  }
+
+  const status = getInviteStatus(invite);
+  if (status === "revoked") {
+    sendError(res, 410, "INVITE_REVOKED", "This invite has been revoked.");
+    return;
+  }
+
+  if (status === "accepted") {
+    sendError(res, 409, "INVITE_ACCEPTED", "This invite has already been accepted.");
+    return;
+  }
+
+  if (status === "expired") {
+    sendError(res, 410, "INVITE_EXPIRED", "This invite has expired.");
+    return;
+  }
+
+  const sessionResult = await auth.api.getSession({
+    headers: fromNodeHeaders(req.headers),
+  });
+
+  const sessionUser = sessionResult?.user;
+  if (!sessionUser) {
+    sendError(res, 401, "UNAUTHORIZED", "You must sign in with the invited email first.");
+    return;
+  }
+
+  const sessionEmail = normalizeEmail(sessionUser.email ?? "");
+  if (sessionEmail !== normalizeEmail(invite.email)) {
+    sendError(
+      res,
+      403,
+      "INVITE_EMAIL_MISMATCH",
+      "This invite must be accepted with the invited email address.",
+    );
+    return;
+  }
+
+  const acceptedAt = new Date();
+
+  const createdProfile = await db.transaction(async (tx) => {
+    await tx
+      .update(user)
+      .set({
+        name: invite.fullName,
+        email: normalizeEmail(invite.email),
+        updatedAt: acceptedAt,
+      })
+      .where(eq(user.id, sessionUser.id));
+
+    const [profile] = await tx
+      .insert(adminProfiles)
+      .values({
+        id: sessionUser.id,
+        email: normalizeEmail(invite.email),
+        fullName: invite.fullName,
+        role: invite.role,
+        permissions: invite.role === "super_admin" ? [] : invite.permissions,
+        avatarUrl: sessionUser.image ?? null,
+        isActive: true,
+        createdAt: acceptedAt,
+        updatedAt: acceptedAt,
+      })
+      .onConflictDoUpdate({
+        target: adminProfiles.id,
+        set: {
+          email: normalizeEmail(invite.email),
+          fullName: invite.fullName,
+          role: invite.role,
+          permissions: invite.role === "super_admin" ? [] : invite.permissions,
+          avatarUrl: sessionUser.image ?? null,
+          isActive: true,
+          updatedAt: acceptedAt,
+        },
+      })
+      .returning();
+
+    await tx
+      .update(adminInvites)
+      .set({
+        acceptedAt,
+        acceptedById: sessionUser.id,
+        updatedAt: acceptedAt,
+      })
+      .where(eq(adminInvites.id, invite.id));
+
+    return profile;
+  });
+
+  sendData(res, createdProfile);
+});
+
+adminRouter.get("/public/member-invites/:token", async (req, res) => {
+  const invite = await findMemberInviteByToken(pathParam(req, "token"));
+  if (!invite) {
+    sendError(res, 404, "NOT_FOUND", "Invite not found.");
+    return;
+  }
+
+  sendData(res, {
+    ...serializeMemberInvite(invite),
+    invitee_email: invite.email,
+  });
+});
+
+adminRouter.post("/public/member-invites/:token/accept", async (req, res) => {
+  const invite = await findMemberInviteByToken(pathParam(req, "token"));
+  if (!invite) {
+    sendError(res, 404, "NOT_FOUND", "Invite not found.");
+    return;
+  }
+
+  const status = getMemberInviteStatus(invite);
+  if (status === "revoked") {
+    sendError(res, 410, "INVITE_REVOKED", "This invite has been revoked.");
+    return;
+  }
+
+  if (status === "accepted") {
+    sendError(res, 409, "INVITE_ACCEPTED", "This invite has already been accepted.");
+    return;
+  }
+
+  if (status === "expired") {
+    sendError(res, 410, "INVITE_EXPIRED", "This invite has expired.");
+    return;
+  }
+
+  const sessionResult = await auth.api.getSession({
+    headers: fromNodeHeaders(req.headers),
+  });
+
+  const sessionUser = sessionResult?.user;
+  if (!sessionUser) {
+    sendError(res, 401, "UNAUTHORIZED", "You must sign in with the invited email first.");
+    return;
+  }
+
+  const sessionEmail = normalizeEmail(sessionUser.email ?? "");
+  if (sessionEmail !== normalizeEmail(invite.email)) {
+    sendError(
+      res,
+      403,
+      "INVITE_EMAIL_MISMATCH",
+      "This invite must be accepted with the invited email address.",
+    );
+    return;
+  }
+
+  const acceptedAt = new Date();
+  const username = await generateUniqueMemberUsername(invite.fullName, invite.email);
+
+  const result = await db.transaction(async (tx) => {
+    await tx
+      .update(user)
+      .set({
+        name: invite.fullName,
+        email: normalizeEmail(invite.email),
+        updatedAt: acceptedAt,
+      })
+      .where(eq(user.id, sessionUser.id));
+
+    const [memberProfile] = await tx
+      .insert(memberProfiles)
+      .values({
+        id: sessionUser.id,
+        email: normalizeEmail(invite.email),
+        fullName: invite.fullName,
+        username,
+        bio: null,
+        imageUrl: sessionUser.image ?? null,
+        isActive: true,
+        createdAt: acceptedAt,
+        updatedAt: acceptedAt,
+      })
+      .onConflictDoUpdate({
+        target: memberProfiles.id,
+        set: {
+          email: normalizeEmail(invite.email),
+          fullName: invite.fullName,
+          isActive: true,
+          updatedAt: acceptedAt,
+        },
+      })
+      .returning();
+
+    let linkedTeamMemberId = invite.linkedTeamMemberId;
+
+    if (linkedTeamMemberId) {
+      await tx
+        .update(teamMembers)
+        .set({
+          memberProfileId: memberProfile.id,
+          name: invite.fullName,
+          role: invite.role,
+          updatedAt: acceptedAt,
+        })
+        .where(eq(teamMembers.id, linkedTeamMemberId));
+    } else {
+      const [teamMember] = await tx
+        .insert(teamMembers)
+        .values({
+          memberProfileId: memberProfile.id,
+          name: invite.fullName,
+          role: invite.role,
+          bio: null,
+          imageUrl: memberProfile.imageUrl,
+          memberType: invite.memberType,
+          orderIndex: 0,
+          createdAt: acceptedAt,
+          updatedAt: acceptedAt,
+        })
+        .returning();
+
+      linkedTeamMemberId = teamMember.id;
+    }
+
+    await tx
+      .update(memberInvites)
+      .set({
+        acceptedAt,
+        acceptedById: sessionUser.id,
+        linkedTeamMemberId,
+        updatedAt: acceptedAt,
+      })
+      .where(eq(memberInvites.id, invite.id));
+
+    return {
+      memberProfile,
+      linked_team_member_id: linkedTeamMemberId,
+    };
+  });
+
+  sendData(res, result);
+});
+
 adminRouter.use(requireSession);
 adminRouter.use(requireAdminProfile);
 
@@ -437,62 +941,6 @@ adminRouter.get("/admin-profiles", requireSuperAdmin, async (_req, res) => {
   sendData(res, rows);
 });
 
-adminRouter.post("/admin-profiles", requireSuperAdmin, async (req, res) => {
-  const parsed = adminProfileSchema.safeParse({
-    ...req.body,
-    is_active: parseBoolean(req.body?.is_active, true),
-    permissions: toPermissionList(req.body?.permissions),
-  });
-
-  if (!parsed.success) {
-    sendError(res, 400, "INVALID_REQUEST", "Invalid admin profile payload.");
-    return;
-  }
-
-  const data = parsed.data;
-  const existingUserByEmail = await db
-    .select({ id: user.id })
-    .from(user)
-    .where(eq(user.email, data.email))
-    .limit(1);
-
-  const existingId = existingUserByEmail[0]?.id;
-  const userId = data.id ?? existingId ?? randomUUID();
-
-  if (existingId && data.id && existingId !== data.id) {
-    sendError(res, 409, "CONFLICT", "Provided user id does not match existing email account.");
-    return;
-  }
-
-  if (!existingId) {
-    await db.insert(user).values({
-      id: userId,
-      name: data.name ?? data.full_name,
-      email: data.email,
-      emailVerified: true,
-      image: data.avatar_url ?? null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
-  }
-
-  const [created] = await db
-    .insert(adminProfiles)
-    .values({
-      id: userId,
-      email: data.email,
-      fullName: data.full_name,
-      role: data.role,
-      permissions: toPermissionList(data.permissions),
-      avatarUrl: parseOptionalString(data.avatar_url),
-      isActive: data.is_active,
-      updatedAt: new Date(),
-    })
-    .returning();
-
-  sendData(res, created, 201);
-});
-
 adminRouter.patch("/admin-profiles/:id", requireSuperAdmin, async (req, res) => {
   const parsed = adminProfileUpdateSchema.safeParse({
     ...req.body,
@@ -510,7 +958,7 @@ adminRouter.patch("/admin-profiles/:id", requireSuperAdmin, async (req, res) => 
     updatedAt: new Date(),
   };
 
-  if (parsed.data.email !== undefined) updates.email = parsed.data.email;
+  if (parsed.data.email !== undefined) updates.email = normalizeEmail(parsed.data.email);
   if (parsed.data.full_name !== undefined) updates.fullName = parsed.data.full_name;
   if (parsed.data.role !== undefined) updates.role = parsed.data.role;
   if (parsed.data.permissions !== undefined) updates.permissions = toPermissionList(parsed.data.permissions);
@@ -528,7 +976,255 @@ adminRouter.patch("/admin-profiles/:id", requireSuperAdmin, async (req, res) => 
     return;
   }
 
+  if (updates.email !== undefined) {
+    await db
+      .update(user)
+      .set({
+        email: updates.email,
+        updatedAt: new Date(),
+      })
+      .where(eq(user.id, updated.id));
+  }
+
   sendData(res, updated);
+});
+
+adminRouter.get("/admin-invites", requireSuperAdmin, async (_req, res) => {
+  const rows = await db.select().from(adminInvites).orderBy(desc(adminInvites.createdAt));
+  sendData(
+    res,
+    rows.map((invite) => serializeAdminInvite(invite)),
+  );
+});
+
+adminRouter.post("/admin-invites", requireSuperAdmin, async (req, res) => {
+  const parsed = adminInviteSchema.safeParse({
+    ...req.body,
+    permissions: toPermissionList(req.body?.permissions),
+    expires_in_days: req.body?.expires_in_days,
+  });
+
+  if (!parsed.success) {
+    sendError(res, 400, "INVALID_REQUEST", "Invalid admin invite payload.");
+    return;
+  }
+
+  const normalizedEmail = normalizeEmail(parsed.data.email);
+  const existingAdmin = await db
+    .select({ id: adminProfiles.id })
+    .from(adminProfiles)
+    .where(sql`lower(${adminProfiles.email}) = ${normalizedEmail}`)
+    .limit(1);
+
+  if (existingAdmin[0]) {
+    sendError(res, 409, "CONFLICT", "This email already has an admin account.");
+    return;
+  }
+
+  const pendingInvite = await db
+    .select({ id: adminInvites.id })
+    .from(adminInvites)
+    .where(
+      and(
+        sql`lower(${adminInvites.email}) = ${normalizedEmail}`,
+        isNull(adminInvites.acceptedAt),
+        isNull(adminInvites.revokedAt),
+        sql`${adminInvites.expiresAt} > now()`,
+      ),
+    )
+    .limit(1);
+
+  if (pendingInvite[0]) {
+    sendError(res, 409, "CONFLICT", "This email already has a pending invite.");
+    return;
+  }
+
+  const requesterId = getAuthenticatedUserId(req);
+  if (!requesterId) {
+    sendError(res, 401, "UNAUTHORIZED", "Authentication is required.");
+    return;
+  }
+
+  const expiresInDays = parsed.data.expires_in_days ?? 7;
+  const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
+  const token = createInviteToken();
+  const inviteLink = buildInviteLink(token);
+  let createdInviteId: string | null = null;
+
+  try {
+    await ensureInvitedUserExists({
+      email: normalizedEmail,
+      fullName: parsed.data.full_name,
+    });
+
+    const [created] = await db
+      .insert(adminInvites)
+      .values({
+        email: normalizedEmail,
+        fullName: parsed.data.full_name,
+        role: parsed.data.role,
+        permissions: parsed.data.role === "super_admin" ? [] : toPermissionList(parsed.data.permissions),
+        tokenHash: hashInviteToken(token),
+        invitedById: requesterId,
+        expiresAt,
+        updatedAt: new Date(),
+      })
+      .returning();
+    createdInviteId = created.id;
+
+    await sendAdminInviteEmail({
+      email: normalizedEmail,
+      fullName: parsed.data.full_name,
+      role: parsed.data.role,
+      inviteLink,
+      expiresAt,
+    });
+
+    sendData(res, serializeAdminInvite(created), 201);
+  } catch (error) {
+    console.error("Failed to create admin invite:", error);
+    if (createdInviteId) {
+      await db.delete(adminInvites).where(eq(adminInvites.id, createdInviteId));
+    }
+    sendError(res, 500, "INVITE_ERROR", "Failed to create and send the admin invite.");
+  }
+});
+
+adminRouter.post("/admin-invites/:id/revoke", requireSuperAdmin, async (req, res) => {
+  const [updated] = await db
+    .update(adminInvites)
+    .set({
+      revokedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(adminInvites.id, pathParam(req, "id")))
+    .returning();
+
+  if (!updated) {
+    sendError(res, 404, "NOT_FOUND", "Admin invite not found.");
+    return;
+  }
+
+  sendData(res, serializeAdminInvite(updated));
+});
+
+adminRouter.get("/member-invites", requireAdminPermission("team"), async (_req, res) => {
+  const rows = await db.select().from(memberInvites).orderBy(desc(memberInvites.createdAt));
+  sendData(
+    res,
+    rows.map((invite) => serializeMemberInvite(invite)),
+  );
+});
+
+adminRouter.post("/member-invites", requireAdminPermission("team"), async (req, res) => {
+  const parsed = memberInviteSchema.safeParse({
+    ...req.body,
+    expires_in_days: req.body?.expires_in_days,
+  });
+
+  if (!parsed.success) {
+    sendError(res, 400, "INVALID_REQUEST", "Invalid member invite payload.");
+    return;
+  }
+
+  const normalizedEmail = normalizeEmail(parsed.data.email);
+  const existingProfile = await db
+    .select({ id: memberProfiles.id })
+    .from(memberProfiles)
+    .where(sql`lower(${memberProfiles.email}) = ${normalizedEmail}`)
+    .limit(1);
+
+  if (existingProfile[0]) {
+    sendError(res, 409, "CONFLICT", "This email already has a member account.");
+    return;
+  }
+
+  const existingPendingInvite = await db
+    .select({ id: memberInvites.id })
+    .from(memberInvites)
+    .where(
+      and(
+        sql`lower(${memberInvites.email}) = ${normalizedEmail}`,
+        isNull(memberInvites.acceptedAt),
+        isNull(memberInvites.revokedAt),
+        sql`${memberInvites.expiresAt} > now()`,
+      ),
+    )
+    .limit(1);
+
+  if (existingPendingInvite[0]) {
+    sendError(res, 409, "CONFLICT", "This email already has a pending member invite.");
+    return;
+  }
+
+  const requesterId = getAuthenticatedUserId(req);
+  if (!requesterId) {
+    sendError(res, 401, "UNAUTHORIZED", "Authentication is required.");
+    return;
+  }
+
+  const expiresInDays = parsed.data.expires_in_days ?? 7;
+  const expiresAt = new Date(Date.now() + expiresInDays * 24 * 60 * 60 * 1000);
+  const token = createInviteToken();
+  const inviteLink = buildMemberInviteLink(token);
+  let createdInviteId: string | null = null;
+
+  try {
+    await ensureInvitedUserExists({
+      email: normalizedEmail,
+      fullName: parsed.data.full_name,
+    });
+
+    const [created] = await db
+      .insert(memberInvites)
+      .values({
+        email: normalizedEmail,
+        fullName: parsed.data.full_name,
+        role: parsed.data.role,
+        memberType: parsed.data.member_type ?? "team",
+        tokenHash: hashInviteToken(token),
+        invitedById: requesterId,
+        expiresAt,
+        updatedAt: new Date(),
+      })
+      .returning();
+
+    createdInviteId = created.id;
+
+    await sendMemberInviteEmail({
+      email: normalizedEmail,
+      fullName: parsed.data.full_name,
+      role: parsed.data.role,
+      inviteLink,
+      expiresAt,
+    });
+
+    sendData(res, serializeMemberInvite(created), 201);
+  } catch (error) {
+    console.error("Failed to create member invite:", error);
+    if (createdInviteId) {
+      await db.delete(memberInvites).where(eq(memberInvites.id, createdInviteId));
+    }
+    sendError(res, 500, "INVITE_ERROR", "Failed to create and send the member invite.");
+  }
+});
+
+adminRouter.post("/member-invites/:id/revoke", requireAdminPermission("team"), async (req, res) => {
+  const [updated] = await db
+    .update(memberInvites)
+    .set({
+      revokedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(memberInvites.id, pathParam(req, "id")))
+    .returning();
+
+  if (!updated) {
+    sendError(res, 404, "NOT_FOUND", "Member invite not found.");
+    return;
+  }
+
+  sendData(res, serializeMemberInvite(updated));
 });
 
 adminRouter.patch("/admin-profiles/:id/active", requireSuperAdmin, async (req, res) => {
@@ -794,11 +1490,38 @@ adminRouter.get("/team-members", requireAdminPermission("team"), async (req, res
 
   const rows = memberType
     ? await db
-        .select()
+        .select({
+          id: teamMembers.id,
+          member_profile_id: teamMembers.memberProfileId,
+          name: teamMembers.name,
+          role: teamMembers.role,
+          bio: sql<string | null>`coalesce(${memberProfiles.bio}, ${teamMembers.bio})`,
+          image_url: sql<string | null>`coalesce(${memberProfiles.imageUrl}, ${teamMembers.imageUrl})`,
+          member_type: teamMembers.memberType,
+          order_index: teamMembers.orderIndex,
+          created_at: teamMembers.createdAt,
+          updated_at: teamMembers.updatedAt,
+        })
         .from(teamMembers)
+        .leftJoin(memberProfiles, eq(teamMembers.memberProfileId, memberProfiles.id))
         .where(eq(teamMembers.memberType, memberType))
         .orderBy(asc(teamMembers.orderIndex))
-    : await db.select().from(teamMembers).orderBy(asc(teamMembers.orderIndex));
+    : await db
+        .select({
+          id: teamMembers.id,
+          member_profile_id: teamMembers.memberProfileId,
+          name: teamMembers.name,
+          role: teamMembers.role,
+          bio: sql<string | null>`coalesce(${memberProfiles.bio}, ${teamMembers.bio})`,
+          image_url: sql<string | null>`coalesce(${memberProfiles.imageUrl}, ${teamMembers.imageUrl})`,
+          member_type: teamMembers.memberType,
+          order_index: teamMembers.orderIndex,
+          created_at: teamMembers.createdAt,
+          updated_at: teamMembers.updatedAt,
+        })
+        .from(teamMembers)
+        .leftJoin(memberProfiles, eq(teamMembers.memberProfileId, memberProfiles.id))
+        .orderBy(asc(teamMembers.orderIndex));
 
   sendData(res, rows);
 });
@@ -1537,9 +2260,26 @@ adminRouter.post("/uploads/image", requireAnyAdminPermission(imageUploadPermissi
     }
 
     try {
-      const payload = await saveUploadFile(req, file, "uploads");
+      if (!isS3StorageConfigured()) {
+        sendError(
+          res,
+          503,
+          "UPLOAD_CONFIGURATION_ERROR",
+          "S3 image storage is not configured.",
+        );
+        return;
+      }
+
+      const payload = await uploadImageToS3({
+        buffer: file.buffer,
+        contentType: file.mimetype,
+        originalName: file.originalname,
+        folder: normalizeUploadFolder(req.body.folder, "uploads"),
+        size: file.size,
+      });
       sendData(res, payload, 201);
-    } catch {
+    } catch (error) {
+      console.error("Failed to store image upload in S3:", error);
       sendError(res, 500, "UPLOAD_ERROR", "Failed to store image upload.");
     }
   });
@@ -1584,7 +2324,7 @@ adminRouter.post("/uploads/video", requireAnyAdminPermission(videoUploadPermissi
     }
 
     try {
-      const payload = await saveUploadFile(req, file, "videos");
+      const payload = await saveLocalUploadFile(req, file, "videos");
       sendData(res, payload, 201);
     } catch {
       sendError(res, 500, "UPLOAD_ERROR", "Failed to store video upload.");

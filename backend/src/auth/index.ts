@@ -1,10 +1,10 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP } from "better-auth/plugins";
-import { Resend } from "resend";
 import { env } from "../config/env.js";
 import { db } from "../db/index.js";
 import * as schema from "../db/schema.js";
+import { sendTransactionalEmail } from "../email/transactional.js";
 
 function getRequiredAuthEnvValue(key: "BETTER_AUTH_SECRET" | "RESEND_API_KEY" | "RESEND_FROM_EMAIL"): string {
   const value = env[key];
@@ -15,9 +15,8 @@ function getRequiredAuthEnvValue(key: "BETTER_AUTH_SECRET" | "RESEND_API_KEY" | 
 }
 
 const betterAuthSecret = getRequiredAuthEnvValue("BETTER_AUTH_SECRET");
-const resendApiKey = getRequiredAuthEnvValue("RESEND_API_KEY");
-const resendFromEmail = getRequiredAuthEnvValue("RESEND_FROM_EMAIL");
-const resend = new Resend(resendApiKey);
+getRequiredAuthEnvValue("RESEND_API_KEY");
+getRequiredAuthEnvValue("RESEND_FROM_EMAIL");
 
 function resolveAuthBaseURL(): string {
   if (env.BETTER_AUTH_URL) {
@@ -38,8 +37,7 @@ async function sendVerificationOTP(data: {
   otp: string;
   type: "sign-in" | "email-verification" | "forget-password" | "change-email";
 }): Promise<void> {
-  await resend.emails.send({
-    from: resendFromEmail,
+  await sendTransactionalEmail({
     to: data.email,
     subject: "Your sign-in code",
     text: `Your one-time code is ${data.otp}. It expires in ${env.AUTH_OTP_EXPIRES_IN_SECONDS} seconds.`,

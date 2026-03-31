@@ -1,5 +1,9 @@
 import { cookies, headers } from "next/headers";
-import { normalizeInternalApiError, requestInternalApi } from "@/lib/backend/internal-api";
+import {
+  createForwardedHeaders,
+  normalizeInternalApiError,
+  requestInternalApi,
+} from "@/lib/backend/internal-api";
 
 type InternalApiMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -25,23 +29,41 @@ function toErrorMessage(status: number, payload: unknown): string {
   return normalizeInternalApiError(status, payload).error.message;
 }
 
-function getRequestMetadata(): {
+async function getRequestMetadata(): Promise<{
   cookieHeader: string | null;
   forwardedFor: string | null;
-} {
+  forwardedHeaders: Record<string, string>;
+}> {
+  const requestHeaders = await headers();
+  const cookieStore = await cookies();
+  const host = requestHeaders.get("host");
+  const proto = requestHeaders.get("x-forwarded-proto") ?? "http";
+  const port =
+    requestHeaders.get("x-forwarded-port") ??
+    (host?.includes(":") ? host.split(":").at(-1) ?? null : proto === "https" ? "443" : "80");
+
   return {
-    cookieHeader: cookies().toString(),
-    forwardedFor: headers().get("x-forwarded-for"),
+    cookieHeader: cookieStore.toString(),
+    forwardedFor: requestHeaders.get("x-forwarded-for"),
+    forwardedHeaders: createForwardedHeaders({
+      origin: requestHeaders.get("origin"),
+      referer: requestHeaders.get("referer"),
+      host,
+      proto,
+      port,
+      userAgent: requestHeaders.get("user-agent"),
+    }),
   };
 }
 
 export async function fetchServerData<T>(path: string): Promise<T | null> {
-  const { cookieHeader, forwardedFor } = getRequestMetadata();
+  const { cookieHeader, forwardedFor, forwardedHeaders } = await getRequestMetadata();
   const result = await requestInternalApi({
     path,
     method: "GET",
     cookieHeader,
     forwardedFor,
+    forwardedHeaders,
   });
 
   if (!result.ok) {
@@ -52,13 +74,14 @@ export async function fetchServerData<T>(path: string): Promise<T | null> {
 }
 
 export async function requestServerData<T>(options: ServerApiRequestOptions): Promise<T> {
-  const { cookieHeader, forwardedFor } = getRequestMetadata();
+  const { cookieHeader, forwardedFor, forwardedHeaders } = await getRequestMetadata();
   const result = await requestInternalApi({
     path: options.path,
     method: options.method ?? "GET",
     body: options.body,
     cookieHeader,
     forwardedFor,
+    forwardedHeaders,
   });
 
   if (!result.ok) {
@@ -67,4 +90,3 @@ export async function requestServerData<T>(options: ServerApiRequestOptions): Pr
 
   return unwrapDataPayload<T>(result.data) as T;
 }
-

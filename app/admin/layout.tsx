@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { getAdminProfile } from "@/lib/admin";
+import { getCurrentAdminProfile } from "@/lib/auth/server";
 import AdminSidebar from "@/components/admin/sidebar";
 import AdminHeader from "@/components/admin/header";
 
@@ -13,24 +13,24 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = headers().get("x-url") ?? "";
+  const pathname = (await headers()).get("x-url") ?? "";
 
   if (pathname === "/admin/login") {
     return <>{children}</>;
   }
 
-  const isBlogEditor = pathname.includes("/admin/blog/new") || 
+  const isBlogEditor = pathname.includes("/admin/blog/new") ||
     (pathname.includes("/admin/blog/") && pathname !== "/admin/blog");
-  
+
   if (isBlogEditor) {
-    const profile = await getAdminProfile();
+    const profile = await getCurrentAdminProfile();
     if (!profile || !profile.is_active) {
       redirect("/admin/login");
     }
     return <>{children}</>;
   }
 
-  const profile = await getAdminProfile();
+  const profile = await getCurrentAdminProfile();
 
   if (!profile || !profile.is_active) {
     redirect("/admin/login");

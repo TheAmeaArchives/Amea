@@ -72,7 +72,7 @@ export default async function RootLayout({
     children: React.ReactNode;
 }>) {
 
-    const pathname = headers().get('x-url');
+    const pathname = (await headers()).get('x-url');
     const isAdminRoute = pathname?.startsWith('/admin');
     const pathHasBackButton = !isAdminRoute && matchesAny(pathname as string, pathsHavingBackButton);
     

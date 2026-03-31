@@ -1,9 +1,9 @@
-import { fetchServerData } from "@/lib/backend/server-api";
+import { getCurrentAdminProfile as getServerAdminProfile } from "@/lib/auth/server";
 import type { Permission } from "@/lib/types";
 import type { AdminProfile } from "@/lib/types";
 
 async function getCurrentAdminProfile(): Promise<AdminProfile | null> {
-  return fetchServerData<AdminProfile>("/api/admin/current-admin/profile");
+  return getServerAdminProfile();
 }
 
 export async function checkIsAdmin(): Promise<boolean> {

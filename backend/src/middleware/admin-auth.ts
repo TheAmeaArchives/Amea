@@ -1,10 +1,10 @@
 import { APIError } from "@better-auth/core/error";
 import { fromNodeHeaders } from "better-auth/node";
-import { and, eq, type InferSelectModel } from "drizzle-orm";
+import { and, eq, sql, type InferSelectModel } from "drizzle-orm";
 import type { NextFunction, Request, Response as ExpressResponse } from "express";
 import { auth } from "../auth/index.js";
 import { db } from "../db/index.js";
-import { adminProfiles } from "../db/schema.js";
+import { adminProfiles, user } from "../db/schema.js";
 
 export const adminPermissions = [
   "blog",
@@ -38,7 +38,15 @@ function setResponseHeadersFromAuth(res: ExpressResponse, authResponse: globalTh
     getSetCookie?: () => string[];
   };
 
-  const setCookie = headersWithCookies.getSetCookie?.() ?? [];
+  const setCookie =
+    headersWithCookies.getSetCookie?.() ??
+    authResponse.headers
+      .get("set-cookie")
+      ?.split(/,(?=\s*[^;,\s]+=)/g)
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0) ??
+    [];
+
   if (setCookie.length > 0) {
     res.setHeader("set-cookie", setCookie);
   }
@@ -80,6 +88,64 @@ function normalizePermissions(input: unknown): string[] {
   }
 
   return input.filter((value): value is string => typeof value === "string");
+}
+
+async function findAndRepairAdminProfile(
+  authUser: NonNullable<AuthenticatedRequest["authUser"]>,
+): Promise<AdminProfileRecord | null> {
+  const [profileById] = await db
+    .select()
+    .from(adminProfiles)
+    .where(and(eq(adminProfiles.id, authUser.id), eq(adminProfiles.isActive, true)))
+    .limit(1);
+
+  if (profileById) {
+    return {
+      ...profileById,
+      permissions: normalizePermissions(profileById.permissions),
+    };
+  }
+
+  const normalizedEmail = authUser.email?.trim().toLowerCase();
+  if (!normalizedEmail) {
+    return null;
+  }
+
+  const [profileByEmail] = await db
+    .select()
+    .from(adminProfiles)
+    .where(and(sql`lower(${adminProfiles.email}) = ${normalizedEmail}`, eq(adminProfiles.isActive, true)))
+    .limit(1);
+
+  if (!profileByEmail) {
+    return null;
+  }
+
+  await db.transaction(async (tx) => {
+    await tx
+      .update(adminProfiles)
+      .set({
+        id: authUser.id,
+        email: normalizedEmail,
+        updatedAt: new Date(),
+      })
+      .where(eq(adminProfiles.id, profileByEmail.id));
+
+    await tx
+      .update(user)
+      .set({
+        email: normalizedEmail,
+        updatedAt: new Date(),
+      })
+      .where(eq(user.id, authUser.id));
+  });
+
+  return {
+    ...profileByEmail,
+    id: authUser.id,
+    email: normalizedEmail,
+    permissions: normalizePermissions(profileByEmail.permissions),
+  };
 }
 
 export function hasPermission(profile: AdminProfileRecord, permission: AdminPermission): boolean {
@@ -158,21 +224,14 @@ export async function requireAdminProfile(
     return;
   }
 
-  const [profile] = await db
-    .select()
-    .from(adminProfiles)
-    .where(and(eq(adminProfiles.id, requestWithAuth.authUser.id), eq(adminProfiles.isActive, true)))
-    .limit(1);
+  const profile = await findAndRepairAdminProfile(requestWithAuth.authUser);
 
   if (!profile) {
     sendError(res, 403, "FORBIDDEN", "Active admin profile is required.");
     return;
   }
 
-  requestWithAuth.adminProfile = {
-    ...profile,
-    permissions: normalizePermissions(profile.permissions),
-  };
+  requestWithAuth.adminProfile = profile;
 
   next();
 }

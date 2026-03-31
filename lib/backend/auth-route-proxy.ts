@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { normalizeInternalApiError, requestInternalApi } from "@/lib/backend/internal-api";
 
-function appendSetCookieHeaders(response: NextResponse, setCookies: string[]): void {
-  for (const cookieHeader of setCookies) {
-    response.headers.append("set-cookie", cookieHeader);
-  }
-}
-
 async function parseRequestBody(request: NextRequest): Promise<
   | {
       body: unknown;
@@ -48,6 +42,12 @@ async function parseRequestBody(request: NextRequest): Promise<
   }
 }
 
+function appendSetCookieHeaders(response: NextResponse, setCookies: string[]): void {
+  for (const cookieHeader of setCookies) {
+    response.headers.append("set-cookie", cookieHeader.replace(/;\s*Domain=[^;]+/gi, ""));
+  }
+}
+
 export async function proxyJsonRoute(request: NextRequest, backendPath: string): Promise<NextResponse> {
   const parsedBody = await parseRequestBody(request);
   if (parsedBody.error) {
@@ -70,5 +70,30 @@ export async function proxyJsonRoute(request: NextRequest, backendPath: string):
 }
 
 export async function proxyAuthRoute(request: NextRequest, backendPath: string): Promise<NextResponse> {
-  return proxyJsonRoute(request, backendPath);
+  const parsedBody = await parseRequestBody(request);
+  if (parsedBody.error) {
+    return parsedBody.error;
+  }
+
+  const result = await requestInternalApi({
+    path: backendPath,
+    method: request.method as "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
+    body: parsedBody.body ?? undefined,
+    cookieHeader: request.headers.get("cookie"),
+    forwardedFor: request.headers.get("x-forwarded-for"),
+    forwardedHeaders: {
+      origin: request.headers.get("origin"),
+      referer: request.headers.get("referer"),
+      "user-agent": request.headers.get("user-agent"),
+      "x-forwarded-host": request.headers.get("host"),
+      "x-forwarded-proto": request.nextUrl.protocol.replace(":", ""),
+      "x-forwarded-port": request.nextUrl.port || (request.nextUrl.protocol === "https:" ? "443" : "80"),
+    },
+  });
+
+  const payload = result.ok ? result.data : normalizeInternalApiError(result.status, result.data);
+  const response = NextResponse.json(payload, { status: result.status });
+
+  appendSetCookieHeaders(response, result.setCookies);
+  return response;
 }

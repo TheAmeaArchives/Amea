@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 interface EditModeContextType {
   isEditMode: boolean;
@@ -25,18 +25,15 @@ interface EditModeProviderProps {
 
 export function EditModeProvider({ children, canEditSiteContent }: EditModeProviderProps) {
   const [isEditMode, setIsEditMode] = useState(false);
-
-  useEffect(() => {
-    if (!canEditSiteContent) {
-      setIsEditMode(false);
-    }
-  }, [canEditSiteContent]);
+  const setEditMode = (value: boolean) => {
+    setIsEditMode(canEditSiteContent ? value : false);
+  };
 
   return (
     <EditModeContext.Provider
       value={{
         isEditMode: canEditSiteContent && isEditMode,
-        setEditMode: setIsEditMode,
+        setEditMode,
         canEditSiteContent,
       }}
     >

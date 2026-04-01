@@ -13,6 +13,7 @@ import {
 import { LogOut, Globe } from "lucide-react";
 import type { AdminProfile } from "@/lib/types";
 import { logout } from "@/app/admin/actions/auth";
+import Link from "next/link";
 
 export default function AdminHeader({ profile }: { profile: AdminProfile }) {
   async function handleLogout() {
@@ -34,13 +35,13 @@ export default function AdminHeader({ profile }: { profile: AdminProfile }) {
       </h2>
 
       <div className="flex items-center gap-4">
-        <a
+        <Link
           href="/"
           className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
         >
           <Globe className="w-4 h-4" />
           <span className="hidden sm:inline">View Site</span>
-        </a>
+        </Link>
 
         <Badge
           variant={profile.role === "super_admin" ? "default" : "secondary"}

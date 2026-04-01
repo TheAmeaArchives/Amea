@@ -8,12 +8,13 @@ import BlogEditForm from "./blog-edit-form";
 export default async function EditBlogPostPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const profile = await getAdminProfile();
   if (!profile || !hasPermission(profile, "blog")) redirect("/admin");
 
-  const post = await fetchServerData<BlogPost>(`/api/admin/blog-posts/${encodeURIComponent(params.id)}`);
+  const post = await fetchServerData<BlogPost>(`/api/admin/blog-posts/${encodeURIComponent(id)}`);
 
   if (!post) notFound();
 

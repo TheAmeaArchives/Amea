@@ -6,9 +6,10 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { BlogContentRenderer } from "@/components/blog/blog-content-renderer";
 
-const BlogPostPage = async ({ params }: { params: { slug: string } }) => {
+const BlogPostPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
+    const { slug } = await params;
     const post = await fetchServerData<BlogPost>(
-        `/api/public/blog-posts/${encodeURIComponent(params.slug)}`
+        `/api/public/blog-posts/${encodeURIComponent(slug)}`
     );
 
     if (!post) {

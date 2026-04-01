@@ -67,7 +67,7 @@ function renderBlock(block: ContentBlock, index: number): React.ReactNode {
         2: "text-3xl font-bold mb-5 mt-8 text-gray-900",
         3: "text-2xl font-semibold mb-4 mt-6 text-gray-900",
       };
-      const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
+      const HeadingTag = `h${level}` as keyof React.JSX.IntrinsicElements;
       return (
         <HeadingTag key={key} className={headingClasses[level] || headingClasses[1]}>
           {textContent}

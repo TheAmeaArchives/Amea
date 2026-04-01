@@ -8,13 +8,14 @@ import ExperimentEditForm from "./experiment-edit-form";
 export default async function EditExperimentPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const profile = await getAdminProfile();
   if (!profile || !hasPermission(profile, "experiments")) redirect("/admin");
 
   const experiment = await fetchServerData<Experiment>(
-    `/api/admin/experiments/${encodeURIComponent(params.id)}`
+    `/api/admin/experiments/${encodeURIComponent(id)}`
   );
 
   if (!experiment) notFound();

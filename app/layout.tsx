@@ -8,6 +8,10 @@ import { pathsHavingBackButton } from "@/constants";
 import {headers} from "next/headers";
 import Back from "@/components/back";
 import { matchesAny } from "@/constants/functions";
+import { Toaster } from "@/components/ui/toaster";
+import { EditModeProvider } from "@/components/admin/edit-mode-context";
+import { EditModeToggle } from "@/components/admin/edit-mode-toggle";
+import { checkAdminPermissions } from "@/lib/check-admin";
 
 export const metadata: Metadata = {
     title: "The Amea Archives",
@@ -68,9 +72,13 @@ export default async function RootLayout({
     children: React.ReactNode;
 }>) {
 
-    const headerList = await headers();
-    const pathname = headerList.get("x-url") ?? "";
-    const pathHasBackButton = matchesAny(pathname, pathsHavingBackButton);
+    const pathname = (await headers()).get('x-url');
+    const isAdminRoute = pathname?.startsWith('/admin');
+    const pathHasBackButton = !isAdminRoute && matchesAny(pathname as string, pathsHavingBackButton);
+    
+    const { canEditSiteContent } = !isAdminRoute 
+        ? await checkAdminPermissions() 
+        : { canEditSiteContent: false };
 
     return (
         <html
@@ -82,27 +90,36 @@ export default async function RootLayout({
             )}
         >
             <body>
-                <Navbar />
-                <main className={cn("w-full min-h-screen px-[105px] max-sm:px-8", {
-                    "py-40 pt-48 md:pt-80": !pathHasBackButton,
-                    "py-20": pathHasBackButton,
-                })}>
-                    {!pathHasBackButton ? (
-                        <>
-                            {children}
-                        </>
-                    ) : (
-                        <>
-                            <Back />
-                            <div className="mt-[85px] md:mt-40">
-                                {children}
-                            </div>
-                        </>
-                    )}
-                </main>
-
-
-                <Footer />
+                {isAdminRoute ? (
+                    <>
+                        {children}
+                        <Toaster />
+                    </>
+                ) : (
+                    <EditModeProvider canEditSiteContent={canEditSiteContent}>
+                        <Navbar />
+                        <main className={cn("w-full min-h-screen px-[105px] max-sm:px-8", {
+                            "py-40 pt-48 md:pt-80": !pathHasBackButton,
+                            "py-20": pathHasBackButton,
+                        })}>
+                            {!pathHasBackButton ? (
+                                <>
+                                    {children}
+                                </>
+                            ) : (
+                                <>
+                                    <Back />
+                                    <div className="mt-[85px] md:mt-40">
+                                        {children}
+                                    </div>
+                                </>
+                            )}
+                        </main>
+                        <Footer />
+                        <EditModeToggle />
+                        <Toaster />
+                    </EditModeProvider>
+                )}
             </body>
         </html>
     );

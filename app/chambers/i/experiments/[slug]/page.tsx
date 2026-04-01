@@ -4,15 +4,19 @@ import { fetchServerData } from "@/lib/backend/server-api";
 import type { Experiment } from "@/lib/types";
 import { notFound } from "next/navigation";
 
-const ExperimentsPage = async ({ params }: { params: { slug: string } }) => {
+type ExperimentsPageProps = {
+    params: Promise<{ slug: string }>;
+};
+
+const ExperimentsPage = async ({ params }: ExperimentsPageProps) => {
+    const { slug } = await params;
     const post = await fetchServerData<Experiment>(
-        `/api/public/experiments/${encodeURIComponent(params.slug)}`
+        `/api/public/experiments/${encodeURIComponent(slug)}`
     );
 
     if (!post) {
         notFound();
     }
-
     return (
         <>
             <div className="md:p-5">

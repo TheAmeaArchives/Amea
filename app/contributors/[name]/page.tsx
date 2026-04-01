@@ -5,8 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-const IndividualContributorPage = async ({ params }: { params: { name: string } }) => {
-    const { name } = params;
+type IndividualContributorPageProps = {
+    params: Promise<{ name: string }>;
+};
+
+const IndividualContributorPage = async ({ params }: IndividualContributorPageProps) => {
+    const { name } = await params;
     const payload = await fetchServerData<{
         contributor: Contributor;
         articles: ContributorArticle[];
@@ -18,7 +22,6 @@ const IndividualContributorPage = async ({ params }: { params: { name: string } 
     }
 
     const articles = payload?.articles ?? [];
-
     return (
         <>
             <div className="md:hidden mb-4">

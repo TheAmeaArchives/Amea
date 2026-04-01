@@ -41,3 +41,6 @@ next-env.d.ts
 .idea/
 .vscode/
 .env
+
+backend/dist
+backend/node_modules

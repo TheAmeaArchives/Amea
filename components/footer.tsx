@@ -21,7 +21,13 @@ const Footer = ({ socialUrls }: FooterProps) => {
         <div className="h-full w-full flex items-center justify-center gap-5">
           {links.map((link) => (
             <Link href={link.url} target="_blank" key={link.name}>
-              <Image src={link.path} alt={link.name} width={20} height={20} />
+              <Image
+                src={link.path}
+                alt={link.name}
+                width={20}
+                height={20}
+                style={{ width: "auto", height: "auto" }}
+              />
             </Link>
           ))}
         </div>
